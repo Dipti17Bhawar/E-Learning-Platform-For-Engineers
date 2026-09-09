@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import api from "../api/axios.js";
-import { useAuth } from "../context/AuthContext.jsx";
+// import api from "../api/axios.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function CourseDetails() {
   const { id } = useParams();
