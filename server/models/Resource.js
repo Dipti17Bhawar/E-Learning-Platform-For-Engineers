@@ -60,7 +60,4 @@ const resourceSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model(
-  "Resource",
-  resourceSchema
-);
+export default mongoose.model("Resource", resourceSchema);

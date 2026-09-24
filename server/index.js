@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import userRoutes from "./routes/userRoutes.js";
 import branchRoutes from "./routes/branchRoutes.js";
@@ -12,6 +14,12 @@ dotenv.config();
 
 const app = express();
 
+// -----------------------------
+// ES MODULE PATH SETUP
+// -----------------------------
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // -----------------------------
 // MIDDLEWARE
@@ -25,9 +33,17 @@ app.use(
 );
 
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
 
+// -----------------------------
+// UPLOADS
+// -----------------------------
+
+// Makes files inside server/uploads publicly accessible
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // -----------------------------
 // ROOT
@@ -39,7 +55,6 @@ app.get("/", (req, res) => {
     message: "E-Learning Platform API is running",
   });
 });
-
 
 // -----------------------------
 // API ROUTES
@@ -53,7 +68,6 @@ app.use("/api/subjects", subjectRoutes);
 
 app.use("/api/resources", resourceRoutes);
 
-
 // -----------------------------
 // 404
 // -----------------------------
@@ -65,35 +79,25 @@ app.use((req, res) => {
   });
 });
 
-
 // -----------------------------
 // START SERVER
 // -----------------------------
 
 const PORT = process.env.PORT || 5000;
 
-
 async function startServer() {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error(
-        "MONGO_URI is missing in .env"
-      );
+      throw new Error("MONGO_URI is missing in .env");
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new Error(
-        "JWT_SECRET is missing in .env"
-      );
+      throw new Error("JWT_SECRET is missing in .env");
     }
 
-    await mongoose.connect(
-      process.env.MONGO_URI
-    );
+    await mongoose.connect(process.env.MONGO_URI);
 
-    console.log(
-      "MongoDB connected successfully"
-    );
+    console.log("MongoDB connected successfully");
 
     app.listen(PORT, () => {
       console.log(

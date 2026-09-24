@@ -11,16 +11,21 @@ export async function createResource(req, res) {
       description,
       type,
       subject,
-      fileUrl,
-      fileName,
       year,
       semester,
     } = req.body;
 
-    if (!title || !type || !fileUrl || !subject) {
+    if (!title || !type || !subject) {
       return res.status(400).json({
         success: false,
-        message: "Title, type, fileUrl and subject are required",
+        message: "Title, type and subject are required",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload a PDF file",
       });
     }
 
@@ -52,15 +57,15 @@ export async function createResource(req, res) {
       description: description || "",
       type,
       subject,
-      fileUrl,
-      fileName: fileName || "",
+      fileUrl: `/uploads/${req.file.filename}`,
+      fileName: req.file.originalname,
       year: year || "",
       semester: semester || "",
     });
 
     return res.status(201).json({
       success: true,
-      message: "Resource added successfully",
+      message: "Resource uploaded successfully",
       resource,
     });
   } catch (error) {
@@ -72,7 +77,7 @@ export async function createResource(req, res) {
       error: error.message,
     });
   }
-}
+};
 
 // ========================================
 // GET ALL RESOURCES
