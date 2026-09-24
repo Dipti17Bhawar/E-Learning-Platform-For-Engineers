@@ -86,17 +86,7 @@ export default function Home() {
           </div>
 
 
-          <div className="feature-card">
-
-            <Video />
-
-            <h3>Video Learning</h3>
-
-            <p>
-              Open video lectures directly from the resource page.
-            </p>
-
-          </div>
+         
 
 
           <div className="feature-card">
