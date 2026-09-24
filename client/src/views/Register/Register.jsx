@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
@@ -45,29 +44,20 @@ export default function Register() {
     }
 
     if (form.password.length < 6) {
-      setError(
-        "Password must contain at least 6 characters."
-      );
+      setError("Password must contain at least 6 characters.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const response = await api.post(
-        "/users/register",
-        {
-          name: form.name.trim(),
-          email: form.email.trim(),
-          password: form.password,
-        
-        }
-      );
+      const response = await api.post("/users/register", {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
 
-      console.log(
-        "Registration response:",
-        response.data
-      );
+      console.log("Registration response:", response.data);
 
       const { token, user } = response.data;
 
@@ -85,19 +75,14 @@ export default function Register() {
         return;
       }
 
-      // Store authentication through AuthContext
       register(token, user);
 
-      // DIRECTLY GO TO DASHBOARD
       navigate("/dashboard", {
         replace: true,
       });
 
     } catch (err) {
-      console.error(
-        "Registration error:",
-        err
-      );
+      console.error("Registration error:", err);
 
       if (err.response) {
         setError(
@@ -106,7 +91,7 @@ export default function Register() {
         );
       } else if (err.request) {
         setError(
-          "Server is not running. Please start the backend."
+          "Unable to connect to the server. Please check the API connection."
         );
       } else {
         setError(
@@ -184,16 +169,12 @@ export default function Register() {
           disabled={loading}
         />
 
-        
-
         <button
           type="submit"
           className="btn btn-primary full"
           disabled={loading}
         >
-          {loading
-            ? "Creating..."
-            : "Create Account"}
+          {loading ? "Creating..." : "Create Account"}
         </button>
 
         <p className="auth-bottom">
