@@ -1,0 +1,31 @@
+.footer {
+  margin-top: auto;
+  padding: 30px 6%;
+  background: #172033;
+  color: #dce2ef;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  gap: 8px;
+}
+
+.footer strong {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.footer p {
+  margin: 6px 0 0;
+  color: #aeb8ca;
+  font-size: 16px;
+}
+
+@media (max-width: 650px) {
+  .footer {
+    padding: 25px 5%;
+  }
+}

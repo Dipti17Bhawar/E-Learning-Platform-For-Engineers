@@ -1,0 +1,7 @@
+.page-loader {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  color: #475467;
+  font-weight: 700;
+}

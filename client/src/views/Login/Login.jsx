@@ -1,77 +1,171 @@
+
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../api/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import "./Login.css";
 
 export default function Login() {
-  const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
-    password: ""
+    password: "",
   });
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
-  const handleChange = (event) => {
-    setForm({
-      ...form,
-      [event.target.name]: event.target.value
-    });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setError("");
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
-    setSubmitting(true);
+
+    if (!form.email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!form.password) {
+      setError("Please enter your password.");
+      return;
+    }
 
     try {
-      await login(form.email, form.password);
-      navigate(location.state?.from?.pathname || "/dashboard");
+      setLoading(true);
+
+      const response = await api.post("/users/login", {
+        email: form.email.trim(),
+        password: form.password,
+      });
+
+      console.log("Login response:", response.data);
+
+      const { token, user } = response.data;
+
+      if (!token) {
+        setError(
+          "Login successful, but token was not received."
+        );
+        return;
+      }
+
+      if (!user) {
+        setError(
+          "Login successful, but user information was not received."
+        );
+        return;
+      }
+
+      // Store authentication through AuthContext
+      login(token, user);
+
+      // DIRECTLY GO TO DASHBOARD
+      navigate("/dashboard", {
+        replace: true,
+      });
+
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+
+      if (err.response) {
+        setError(
+          err.response.data?.message ||
+          "Invalid email or password."
+        );
+      } else if (err.request) {
+        setError(
+          "Server is not running. Please start the backend."
+        );
+      } else {
+        setError(
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <section className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <p>Login to continue learning.</p>
+    <div className="auth-page">
+      <form
+        className="auth-card"
+        onSubmit={handleSubmit}
+      >
+        <span className="eyebrow">
+          WELCOME BACK
+        </span>
 
-        {error && <div className="alert error">{error}</div>}
+        <h1>Student Login</h1>
 
-        <label>Email</label>
+        {error && (
+          <div className="form-error">
+            {error}
+          </div>
+        )}
+
+        <label htmlFor="email">
+          Email
+        </label>
+
         <input
+          id="email"
           name="email"
           type="email"
           value={form.email}
           onChange={handleChange}
           placeholder="you@example.com"
+          autoComplete="email"
           required
+          disabled={loading}
         />
 
-        <label>Password</label>
+        <label htmlFor="password">
+          Password
+        </label>
+
         <input
+          id="password"
           name="password"
           type="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="Minimum 6 characters"
+          placeholder="Enter your password"
+          autoComplete="current-password"
           required
+          disabled={loading}
         />
 
-        <button className="button primary full" disabled={submitting}>
-          {submitting ? "Logging in..." : "Login"}
+        <button
+          type="submit"
+          className="btn btn-primary full"
+          disabled={loading}
+        >
+          {loading
+            ? "Logging in..."
+            : "Login"}
         </button>
 
         <p className="auth-bottom">
-          Don't have an account? <Link to="/register">Register</Link>
+          Don't have an account?{" "}
+          <Link to="/register">
+            Create Account
+          </Link>
         </p>
       </form>
-    </section>
+    </div>
   );
 }
+

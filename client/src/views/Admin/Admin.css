@@ -1,0 +1,107 @@
+.admin-page { background: #f7f8fc; min-height: 100%; }
+.admin-header {
+  padding: 50px 7%;
+  background: linear-gradient(135deg, #eef2ff, #fff);
+}
+.admin-header h1 { color: #172033; font-size: 40px; margin: 10px 0; }
+.admin-header p { color: #667085; }
+
+.admin-content {
+  padding: 40px 7%;
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  gap: 25px;
+  align-items: start;
+}
+
+.admin-form, .admin-list {
+  background: #fff;
+  border: 1px solid #e5e7ee;
+  border-radius: 18px;
+  padding: 25px;
+}
+
+.admin-form h2, .admin-list h2 {
+  margin-top: 0;
+  color: #172033;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-form label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #344054;
+  font-weight: 700;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #d6d9e2;
+  border-radius: 10px;
+  font: inherit;
+  outline: none;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+  border-color: #4f46e5;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-form .btn { margin-top: 20px; }
+
+.admin-resource {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+.admin-resource strong { display: block; color: #172033; }
+.admin-resource span { color: #667085; font-size: 13px; }
+.delete-btn {
+  border: 1px solid #f0c6c6;
+  background: #fff;
+  color: #b42318;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.success-message {
+  grid-column: 1 / -1;
+  padding: 12px;
+  border-radius: 9px;
+  background: #ecfdf3;
+  color: #067647;
+}
+.form-error {
+  grid-column: 1 / -1;
+  padding: 12px;
+  border-radius: 9px;
+  background: #fff0f0;
+  color: #b42318;
+}
+
+@media (max-width: 950px) {
+  .admin-content { grid-template-columns: 1fr; }
+}
+@media (max-width: 550px) {
+  .two-col { grid-template-columns: 1fr; }
+  .admin-resource { align-items: flex-start; flex-direction: column; }
+}

@@ -1,45 +1,73 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import Navbar from "./components/Navbar.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
-import Home from "./views/Home/Home.jsx";
-import Login from "./views/Login/Login.jsx";
-import Register from "./views/Register/Register.jsx";
-import Courses from "./views/Courses/Courses.jsx";
-import CourseDetails from "./views/CourseDetails/CourseDetails.jsx";
-import Dashboard from "./views/Dashboard/Dashboard.jsx";
-import NotFound from "./views/NotFound/NotFound.jsx";
+import Home from "./views/Home/Home";
+import Login from "./views/Login/Login";
+import Register from "./views/Register/Register";
+import Dashboard from "./views/Dashboard/Dashboard";
+import BranchSubjects from "./views/BranchSubjects/BranchSubjects";
+import Subject from "./views/Subject/Subject";
+import About from "./views/About/About";
+import Reviews from "./views/Reviews/Reviews";
+import NotFound from "./views/NotFound/NotFound";
 
-export default function App() {
+function Layout({ children }) {
   return (
     <>
       <Navbar />
 
-      <main className="container">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetails />} />
-
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Route>
-
-          {/* 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+      <main className="main-content">
+        {children}
       </main>
 
-      <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} E-Learning Portal for Engineers
-        </p>
-      </footer>
+      <Footer />
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <Layout>
+      <Routes>
+
+        {/* PUBLIC */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/reviews" element={<Reviews />} />
+
+        {/* PROTECTED */}
+        <Route element={<ProtectedRoute />}>
+
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/branch/:code"
+            element={<BranchSubjects />}
+          />
+
+          {/* IMPORTANT */}
+          <Route
+            path="/subject/:subjectId"
+            element={<Subject />}
+          />
+
+        </Route>
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
+
+      </Routes>
+    </Layout>
   );
 }

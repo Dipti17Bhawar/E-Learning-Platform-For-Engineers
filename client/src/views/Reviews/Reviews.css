@@ -1,0 +1,17 @@
+.reviews-page { background: #f7f8fc; min-height: 100%; }
+.reviews-grid {
+  padding: 50px 7%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.review-card {
+  background: #fff;
+  border: 1px solid #e7e9ef;
+  border-radius: 17px;
+  padding: 25px;
+}
+.stars { color: #f59e0b; display: flex; gap: 3px; }
+.review-card p { color: #667085; line-height: 1.7; min-height: 80px; }
+.review-card strong { color: #172033; }
+@media (max-width: 750px) { .reviews-grid { grid-template-columns: 1fr; } }

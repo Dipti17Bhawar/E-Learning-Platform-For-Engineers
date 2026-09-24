@@ -1,0 +1,12 @@
+.not-found {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  background: #f7f8fc;
+}
+.not-found h1 { font-size: 90px; color: #4f46e5; margin: 0; }
+.not-found h2 { color: #172033; margin: 0; }
+.not-found p { color: #667085; }

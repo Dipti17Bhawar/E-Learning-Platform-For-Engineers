@@ -1,100 +1,208 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../api/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import "./Register.css";
 
 export default function Register() {
-  const { register } = useAuth();
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "student"
+    branch: "",
   });
 
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (event) => {
-    setForm({
-      ...form,
-      [event.target.name]: event.target.value
-    });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setError("");
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
-    setSubmitting(true);
+
+    if (!form.name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    if (!form.email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError(
+        "Password must contain at least 6 characters."
+      );
+      return;
+    }
 
     try {
-      await register(
-        form.name,
-        form.email,
-        form.password,
-        form.role
+      setLoading(true);
+
+      const response = await api.post(
+        "/users/register",
+        {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+        
+        }
       );
-      navigate("/dashboard");
+
+      console.log(
+        "Registration response:",
+        response.data
+      );
+
+      const { token, user } = response.data;
+
+      if (!token) {
+        setError(
+          "Registration completed, but token was not received."
+        );
+        return;
+      }
+
+      if (!user) {
+        setError(
+          "Registration completed, but user information was not received."
+        );
+        return;
+      }
+
+      // Store authentication through AuthContext
+      register(token, user);
+
+      // DIRECTLY GO TO DASHBOARD
+      navigate("/dashboard", {
+        replace: true,
+      });
+
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      console.error(
+        "Registration error:",
+        err
+      );
+
+      if (err.response) {
+        setError(
+          err.response.data?.message ||
+          "Registration failed."
+        );
+      } else if (err.request) {
+        setError(
+          "Server is not running. Please start the backend."
+        );
+      } else {
+        setError(
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <section className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Create Account</h1>
-        <p>Join the engineering learning platform.</p>
+    <div className="auth-page">
+      <form
+        className="auth-card"
+        onSubmit={handleSubmit}
+      >
+        <span className="eyebrow">
+          CREATE ACCOUNT
+        </span>
 
-        {error && <div className="alert error">{error}</div>}
+        <h1>Student Registration</h1>
 
-        <label>Full Name</label>
+        {error && (
+          <div className="form-error">
+            {error}
+          </div>
+        )}
+
+        <label htmlFor="name">
+          Full Name
+        </label>
+
         <input
+          id="name"
           name="name"
+          type="text"
           value={form.name}
           onChange={handleChange}
           placeholder="Your name"
           required
+          disabled={loading}
         />
 
-        <label>Email</label>
+        <label htmlFor="email">
+          Email
+        </label>
+
         <input
+          id="email"
           name="email"
           type="email"
           value={form.email}
           onChange={handleChange}
           placeholder="you@example.com"
+          autoComplete="email"
           required
+          disabled={loading}
         />
 
-        <label>Password</label>
+        <label htmlFor="password">
+          Password
+        </label>
+
         <input
+          id="password"
           name="password"
           type="password"
           value={form.password}
           onChange={handleChange}
           placeholder="Minimum 6 characters"
           minLength="6"
+          autoComplete="new-password"
           required
+          disabled={loading}
         />
 
-        <label>Account Type</label>
-        <select name="role" value={form.role} onChange={handleChange}>
-          <option value="student">Student</option>
-          <option value="instructor">Instructor</option>
-        </select>
+        
 
-        <button className="button primary full" disabled={submitting}>
-          {submitting ? "Creating..." : "Create Account"}
+        <button
+          type="submit"
+          className="btn btn-primary full"
+          disabled={loading}
+        >
+          {loading
+            ? "Creating..."
+            : "Create Account"}
         </button>
 
         <p className="auth-bottom">
-          Already have an account? <Link to="/login">Login</Link>
+          Already registered?{" "}
+          <Link to="/login">
+            Login
+          </Link>
         </p>
       </form>
-    </section>
+    </div>
   );
 }
