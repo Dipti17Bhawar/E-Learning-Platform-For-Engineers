@@ -20,7 +20,7 @@ export default function Home() {
           </h1>
 
           <p>
-            Access branch-wise notes, video lectures, question papers and
+            Access branch-wise notes,  question papers and
             study materials from one simple e-learning platform.
           </p>
 
@@ -50,6 +50,7 @@ export default function Home() {
           <span className="eyebrow">
             FEATURES
           </span>
+  
 
           <h2>
             One platform for your study material
@@ -86,9 +87,7 @@ export default function Home() {
           </div>
 
 
-         
-
-
+        
           <div className="feature-card">
 
             <FileDown />
