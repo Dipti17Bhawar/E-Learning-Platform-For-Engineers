@@ -1,14 +1,11 @@
 .subject-page {
   min-height: calc(100vh - 70px);
-
   background: #f8fafc;
-
   padding: 40px 20px 60px;
 }
 
 .subject-container {
   max-width: 1200px;
-
   margin: 0 auto;
 }
 
@@ -18,23 +15,18 @@
 
 .back-button {
   border: none;
-
   background: transparent;
-
   color: #4f46e5;
 
   display: flex;
   align-items: center;
-
   gap: 8px;
 
   font-size: 14px;
   font-weight: 600;
 
   cursor: pointer;
-
   margin-bottom: 25px;
-
   padding: 0;
 }
 
@@ -44,22 +36,19 @@
 
 
 /* ============================= */
-/* SUBJECT HERO */
+/* SUBJECT HEADER */
 /* ============================= */
 
-.subject-hero {
+.subject-header {
   background: #ffffff;
 
   border: 1px solid #e5e7eb;
-
   border-radius: 20px;
 
   padding: 35px;
 
   display: flex;
-
   align-items: center;
-
   gap: 25px;
 
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
@@ -67,7 +56,7 @@
   margin-bottom: 35px;
 }
 
-.subject-hero-icon {
+.subject-icon {
   width: 85px;
   height: 85px;
 
@@ -76,7 +65,6 @@
   border-radius: 20px;
 
   background: #eef2ff;
-
   color: #4f46e5;
 
   display: flex;
@@ -88,25 +76,22 @@
   color: #4f46e5;
 
   font-size: 13px;
-
   font-weight: 700;
 
   text-transform: uppercase;
-
   letter-spacing: 0.5px;
 }
 
-.subject-hero-content h1 {
+.subject-header h1 {
   margin: 7px 0 10px;
 
   color: #111827;
 
   font-size: 32px;
-
   line-height: 1.2;
 }
 
-.subject-hero-content p {
+.subject-header p {
   margin: 0;
 
   color: #6b7280;
@@ -120,14 +105,13 @@
 
 
 /* ============================= */
-/* RESOURCES INTRO */
+/* RESOURCES HEADING */
 /* ============================= */
 
-.resources-intro {
+.resources-heading {
   display: flex;
 
   justify-content: space-between;
-
   align-items: center;
 
   gap: 20px;
@@ -135,17 +119,16 @@
   margin-bottom: 22px;
 }
 
-.resources-intro h2 {
+.resources-heading h2 {
   margin: 0 0 5px;
 
   color: #111827;
 
   font-size: 24px;
-
   line-height: 1.3;
 }
 
-.resources-intro p {
+.resources-heading p {
   margin: 0;
 
   color: #6b7280;
@@ -158,11 +141,10 @@
 /* VIEW ALL RESOURCES BUTTON */
 /* ============================= */
 
-.resources-main-button {
+.view-all-button {
   border: none;
 
   background: #4f46e5;
-
   color: #ffffff;
 
   padding: 12px 18px;
@@ -170,14 +152,12 @@
   border-radius: 10px;
 
   font-weight: 600;
-
   font-size: 14px;
 
   cursor: pointer;
 
   display: flex;
   align-items: center;
-
   justify-content: center;
 
   gap: 8px;
@@ -190,7 +170,7 @@
     box-shadow 0.2s ease;
 }
 
-.resources-main-button:hover {
+.view-all-button:hover {
   background: #4338ca;
 
   transform: translateY(-1px);
@@ -198,16 +178,16 @@
   box-shadow: 0 5px 12px rgba(79, 70, 229, 0.2);
 }
 
-.resources-main-button:active {
+.view-all-button:active {
   transform: translateY(0);
 }
 
 
 /* ============================= */
-/* RESOURCE PREVIEW GRID */
+/* RESOURCE GRID */
 /* ============================= */
 
-.subject-resource-preview {
+.resource-grid {
   display: grid;
 
   grid-template-columns: repeat(3, 1fr);
@@ -220,7 +200,7 @@
 /* RESOURCE CARD */
 /* ============================= */
 
-.preview-card {
+.resource-card {
   background: #ffffff;
 
   border: 1px solid #e5e7eb;
@@ -241,7 +221,7 @@
     border-color 0.3s ease;
 }
 
-.preview-card:hover {
+.resource-card:hover {
   transform: translateY(-4px);
 
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
@@ -254,7 +234,7 @@
 /* RESOURCE ICON */
 /* ============================= */
 
-.preview-icon {
+.resource-icon {
   width: 50px;
   height: 50px;
 
@@ -274,7 +254,6 @@
 
 .notes-icon {
   background: #eef2ff;
-
   color: #4f46e5;
 }
 
@@ -285,7 +264,6 @@
 
 .qp-icon {
   background: #fef3c7;
-
   color: #d97706;
 }
 
@@ -294,9 +272,8 @@
 /* STUDY MATERIALS */
 /* ============================= */
 
-.study-material-icon {
+.study-icon {
   background: #ecfdf5;
-
   color: #059669;
 }
 
@@ -305,7 +282,7 @@
 /* RESOURCE CARD TEXT */
 /* ============================= */
 
-.preview-card h3 {
+.resource-card h3 {
   margin: 0 0 7px;
 
   color: #111827;
@@ -315,7 +292,7 @@
   line-height: 1.3;
 }
 
-.preview-card p {
+.resource-card p {
   margin: 0;
 
   color: #6b7280;
@@ -326,22 +303,18 @@
 }
 
 
-/* Resource count */
+/* ============================= */
+/* RESOURCE COUNT */
+/* ============================= */
 
-.preview-card p:last-child {
+.resource-card strong {
+  display: block;
+
   margin-top: 14px;
 
   color: #4f46e5;
 
   font-size: 13px;
-
-  font-weight: 600;
-}
-
-.preview-card p:last-child strong {
-  font-size: 15px;
-
-  color: #111827;
 }
 
 
@@ -349,43 +322,17 @@
 /* LOADING */
 /* ============================= */
 
-.subject-loading {
-  max-width: 700px;
-
-  min-height: 300px;
-
-  margin: 50px auto;
-
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-
-  border-radius: 18px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  text-align: center;
-
+.subject-page > .subject-container > p {
   color: #6b7280;
-
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
 }
 
 
 /* ============================= */
-/* ERROR */
+/* ERROR MESSAGE */
 /* ============================= */
 
-.subject-error {
+.error-message {
   max-width: 700px;
-
-  min-height: 300px;
 
   margin: 50px auto;
 
@@ -399,59 +346,15 @@
 
   border-radius: 18px;
 
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
   text-align: center;
 
-  color: #6b7280;
+  color: #dc2626;
 
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
-}
-
-.subject-error h2 {
-  margin: 0 0 8px;
-
-  color: #111827;
-
-  font-size: 22px;
-}
-
-.subject-error p {
-  margin: 0;
-
-  color: #6b7280;
+  font-size: 15px;
 
   line-height: 1.5;
-}
 
-.subject-error button {
-  margin-top: 18px;
-
-  border: none;
-
-  background: #4f46e5;
-
-  color: #ffffff;
-
-  padding: 10px 18px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-weight: 600;
-
-  transition: background 0.2s ease;
-}
-
-.subject-error button:hover {
-  background: #4338ca;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
 }
 
 
@@ -460,15 +363,15 @@
 /* ============================= */
 
 @media (max-width: 900px) {
-  .subject-resource-preview {
+  .resource-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .subject-hero {
+  .subject-header {
     padding: 30px;
   }
 
-  .subject-hero-content h1 {
+  .subject-header h1 {
     font-size: 28px;
   }
 }
@@ -479,17 +382,16 @@
 /* ============================= */
 
 @media (max-width: 700px) {
-  .subject-resource-preview {
+  .resource-grid {
     grid-template-columns: 1fr;
   }
 
-  .resources-intro {
+  .resources-heading {
     flex-direction: column;
-
     align-items: flex-start;
   }
 
-  .resources-main-button {
+  .view-all-button {
     width: 100%;
   }
 }
@@ -504,7 +406,7 @@
     padding: 25px 15px 45px;
   }
 
-  .subject-hero {
+  .subject-header {
     padding: 25px;
 
     flex-direction: column;
@@ -514,26 +416,26 @@
     gap: 18px;
   }
 
-  .subject-hero-icon {
+  .subject-icon {
     width: 70px;
     height: 70px;
 
     border-radius: 16px;
   }
 
-  .subject-hero-content h1 {
+  .subject-header h1 {
     font-size: 26px;
   }
 
-  .subject-hero-content p {
+  .subject-header p {
     font-size: 14px;
   }
 
-  .resources-intro h2 {
+  .resources-heading h2 {
     font-size: 21px;
   }
 
-  .preview-card {
+  .resource-card {
     min-height: auto;
 
     padding: 22px;

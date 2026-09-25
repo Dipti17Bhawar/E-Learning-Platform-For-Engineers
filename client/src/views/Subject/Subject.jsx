@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, FileText, GraduationCap } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  FileText,
+  GraduationCap,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../../api/axios";
 import "./Subject.css";
-
 
 export default function Subject() {
   const { subjectId } = useParams();
@@ -15,7 +19,6 @@ export default function Subject() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     const loadSubject = async () => {
@@ -30,9 +33,8 @@ export default function Subject() {
 
         setSubject(
           subjectResponse.data.subject ||
-          subjectResponse.data
+            subjectResponse.data
         );
-
 
         // Get resources belonging to this subject
         const resourceResponse = await api.get(
@@ -49,42 +51,34 @@ export default function Subject() {
             ? resourceData
             : []
         );
-
       } catch (err) {
         console.error("Subject loading error:", err);
 
         setError(
           err.response?.data?.message ||
-          "Unable to load subject resources."
+            "Unable to load subject resources."
         );
-
       } finally {
         setLoading(false);
       }
     };
 
-
     if (subjectId) {
       loadSubject();
     }
-
   }, [subjectId]);
-
 
   const notesCount = resources.filter(
     (resource) => resource.type === "notes"
   ).length;
 
-
   const questionPapersCount = resources.filter(
     (resource) => resource.type === "question-paper"
   ).length;
 
-
   const studyMaterialsCount = resources.filter(
     (resource) => resource.type === "study-material"
   ).length;
-
 
   if (loading) {
     return (
@@ -95,7 +89,6 @@ export default function Subject() {
       </div>
     );
   }
-
 
   if (error) {
     return (
@@ -119,7 +112,6 @@ export default function Subject() {
     );
   }
 
-
   if (!subject) {
     return (
       <div className="subject-page">
@@ -129,7 +121,6 @@ export default function Subject() {
       </div>
     );
   }
-
 
   return (
     <div className="subject-page">
@@ -173,34 +164,22 @@ export default function Subject() {
         </div>
 
 
-        {/* RESOURCES */}
+        {/* RESOURCES HEADING */}
         <div className="resources-heading">
 
           <div>
             <h2>Learning Resources</h2>
 
             <p>
-              Access all study materials related to this subject.
+              Select a resource category to continue learning.
             </p>
           </div>
-
-
-          <button
-            className="view-all-button"
-            onClick={() =>
-              navigate(`/subject/${subjectId}/resources`)
-            }
-          >
-            View All Resources
-            <ArrowRight size={18} />
-          </button>
 
         </div>
 
 
         {/* RESOURCE CARDS */}
         <div className="resource-grid">
-
 
           {/* NOTES */}
           <div
@@ -217,11 +196,15 @@ export default function Subject() {
             <h3>Notes</h3>
 
             <p>
-              Study notes and learning materials for this subject.
+              Study notes and learning materials
+              for this subject.
             </p>
 
             <strong>
-              {notesCount} {notesCount === 1 ? "resource" : "resources"}
+              {notesCount}{" "}
+              {notesCount === 1
+                ? "resource"
+                : "resources"}
             </strong>
 
           </div>
@@ -231,7 +214,9 @@ export default function Subject() {
           <div
             className="resource-card"
             onClick={() =>
-              navigate(`/subject/${subjectId}/question-papers`)
+              navigate(
+                `/subject/${subjectId}/question-papers`
+              )
             }
           >
 
@@ -242,7 +227,8 @@ export default function Subject() {
             <h3>Question Papers</h3>
 
             <p>
-              Previous year examination papers for practice.
+              Previous year examination papers
+              for practice.
             </p>
 
             <strong>
@@ -255,11 +241,13 @@ export default function Subject() {
           </div>
 
 
-          {/* STUDY MATERIAL */}
+          {/* STUDY MATERIALS */}
           <div
             className="resource-card"
             onClick={() =>
-              navigate(`/subject/${subjectId}/study-materials`)
+              navigate(
+                `/subject/${subjectId}/study-materials`
+              )
             }
           >
 
@@ -270,7 +258,8 @@ export default function Subject() {
             <h3>Study Materials</h3>
 
             <p>
-              Additional study materials for better preparation.
+              Additional study materials for
+              better preparation.
             </p>
 
             <strong>
