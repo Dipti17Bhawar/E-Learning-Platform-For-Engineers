@@ -3,7 +3,6 @@ import {
   Download,
   FileText,
   ExternalLink,
-  GraduationCap,
 } from "lucide-react";
 
 import "./ResourceCard.css";
@@ -12,25 +11,13 @@ export default function ResourceCard({ resource }) {
   const API_URL =
     import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // --------------------------------
-  // RESOURCE TYPE ICON
-  // --------------------------------
-
   const getIcon = () => {
     if (resource.type === "question-paper") {
       return <FileText size={26} />;
     }
 
-    if (resource.type === "study-material") {
-      return <GraduationCap size={26} />;
-    }
-
     return <BookOpen size={26} />;
   };
-
-  // --------------------------------
-  // RESOURCE TYPE NAME
-  // --------------------------------
 
   const getTypeName = () => {
     if (resource.type === "question-paper") {
@@ -44,17 +31,9 @@ export default function ResourceCard({ resource }) {
     return "Notes";
   };
 
-  // --------------------------------
-  // PDF URL
-  // --------------------------------
-
   const fileUrl = resource.fileUrl?.startsWith("http")
     ? resource.fileUrl
     : `${API_URL}${resource.fileUrl}`;
-
-  // --------------------------------
-  // DOWNLOAD
-  // --------------------------------
 
   const handleDownload = () => {
     const link = document.createElement("a");
@@ -65,8 +44,6 @@ export default function ResourceCard({ resource }) {
       resource.title ||
       "resource.pdf";
 
-    link.target = "_blank";
-
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -74,8 +51,6 @@ export default function ResourceCard({ resource }) {
 
   return (
     <div className="resource-card">
-
-      {/* HEADER */}
 
       <div className="resource-card-header">
 
@@ -89,8 +64,6 @@ export default function ResourceCard({ resource }) {
 
       </div>
 
-      {/* CONTENT */}
-
       <div className="resource-card-content">
 
         <h3>{resource.title}</h3>
@@ -100,33 +73,9 @@ export default function ResourceCard({ resource }) {
             "Access this learning resource."}
         </p>
 
-        {/* OPTIONAL DETAILS */}
-
-        {(resource.year || resource.semester) && (
-          <div className="resource-meta">
-
-            {resource.year && (
-              <span>
-                Year: {resource.year}
-              </span>
-            )}
-
-            {resource.semester && (
-              <span>
-                Semester: {resource.semester}
-              </span>
-            )}
-
-          </div>
-        )}
-
       </div>
 
-      {/* ACTIONS */}
-
       <div className="resource-card-actions">
-
-        {/* VIEW PDF */}
 
         <a
           href={fileUrl}
@@ -137,8 +86,6 @@ export default function ResourceCard({ resource }) {
           <ExternalLink size={17} />
           View
         </a>
-
-        {/* DOWNLOAD PDF */}
 
         <button
           type="button"
