@@ -27,22 +27,29 @@ const __dirname = path.dirname(__filename);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin:
+      process.env.CLIENT_URL ||
+      "http://localhost:5173",
     credentials: true,
   })
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 // -----------------------------
 // UPLOADS
 // -----------------------------
 
-// Makes files inside server/uploads publicly accessible
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"))
+  express.static(
+    path.join(__dirname, "uploads")
+  )
 );
 
 // -----------------------------
@@ -52,7 +59,8 @@ app.use(
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "E-Learning Platform API is running",
+    message:
+      "E-Learning Platform API is running",
   });
 });
 
@@ -88,16 +96,24 @@ const PORT = process.env.PORT || 5000;
 async function startServer() {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing in .env");
+      throw new Error(
+        "MONGO_URI is missing in .env"
+      );
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing in .env");
+      throw new Error(
+        "JWT_SECRET is missing in .env"
+      );
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(
+      process.env.MONGO_URI
+    );
 
-    console.log("MongoDB connected successfully");
+    console.log(
+      "MongoDB connected successfully"
+    );
 
     app.listen(PORT, () => {
       console.log(

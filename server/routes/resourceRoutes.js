@@ -3,27 +3,42 @@ import upload from "../middleware/upload.js";
 
 import {
   createResource,
-  getResources,
+  getAllResources,
   getResourcesBySubject,
-  getResource,
+  getResourceById,
   deleteResource,
-} from "../controllers/resourceController.js";
+} from "../controllers/resource.js";
 
 const router = express.Router();
 
-// Add resource with PDF upload
-router.post("/", upload.single("file"), createResource);
+// CREATE RESOURCE
+router.post(
+  "/",
+  upload.single("file"),
+  (req, res, next) => {
+    console.log("========== MULTER DEBUG ==========");
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("==================================");
 
-// Get all resources
-router.get("/", getResources);
+    next();
+  },
+  createResource
+);
 
-// Get resources of particular subject
-router.get("/subject/:subjectId", getResourcesBySubject);
+// GET ALL
+router.get("/", getAllResources);
 
-// Get single resource
-router.get("/:id", getResource);
+// GET BY SUBJECT
+router.get(
+  "/subject/:subjectId",
+  getResourcesBySubject
+);
 
-// Delete resource
+// GET SINGLE
+router.get("/:id", getResourceById);
+
+// DELETE
 router.delete("/:id", deleteResource);
 
 export default router;

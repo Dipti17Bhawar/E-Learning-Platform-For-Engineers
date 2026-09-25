@@ -16,12 +16,12 @@ const resourceSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      required: true,
       enum: [
         "notes",
         "question-paper",
         "study-material",
       ],
+      required: true,
     },
 
     subject: {
@@ -32,22 +32,20 @@ const resourceSchema = new mongoose.Schema(
 
     fileUrl: {
       type: String,
-      default: "",
+      required: true,
     },
 
     fileName: {
       type: String,
-      default: "",
+      required: true,
     },
 
     year: {
-      type: String,
-      default: "",
+      type: Number,
     },
 
     semester: {
-      type: String,
-      default: "",
+      type: Number,
     },
 
     isActive: {

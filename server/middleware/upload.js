@@ -2,37 +2,66 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), "uploads");
+const uploadDir = path.join(
+  process.cwd(),
+  "uploads"
+);
 
+// Create uploads folder if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, {
+    recursive: true,
+  });
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: function (req, file, cb) {
     cb(null, uploadDir);
   },
 
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);
+  filename: function (req, file, cb) {
+    const extension = path.extname(
+      file.originalname
+    );
 
-    cb(null, uniqueName);
+    const name = path
+      .basename(
+        file.originalname,
+        extension
+      )
+      .replace(
+        /[^a-zA-Z0-9-_]/g,
+        "-"
+      );
+
+    cb(
+      null,
+      `${Date.now()}-${name}${extension}`
+    );
   },
 });
 
 const fileFilter = (req, file, cb) => {
+  console.log("FILE FIELD NAME:", file.fieldname);
+  console.log("FILE NAME:", file.originalname);
+  console.log("FILE TYPE:", file.mimetype);
+
   if (file.mimetype === "application/pdf") {
     cb(null, true);
   } else {
-    cb(new Error("Only PDF files are allowed"));
+    cb(
+      new Error("Only PDF files are allowed"),
+      false
+    );
   }
 };
 
-export default multer({
+const upload = multer({
   storage,
   fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
 });
+
+export default upload;
