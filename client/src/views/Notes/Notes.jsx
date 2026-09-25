@@ -23,7 +23,6 @@ export default function Notes() {
 
   const [resources, setResources] = useState([]);
   const [subject, setSubject] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,31 +33,54 @@ export default function Notes() {
             api.get(`/subjects/${subjectId}`),
 
             api.get(
-              `/resources/subject/${subjectId}?type=note`
+              `/resources/subject/${subjectId}`
             ),
           ]);
+
+        // -----------------------------
+        // SUBJECT
+        // -----------------------------
 
         setSubject(
           subjectResponse.data.subject ||
             subjectResponse.data
         );
 
-        setResources(
+        // -----------------------------
+        // ALL RESOURCES
+        // -----------------------------
+
+        const allResources =
           Array.isArray(resourceResponse.data)
             ? resourceResponse.data
-            : resourceResponse.data.resources || []
+            : resourceResponse.data.resources || [];
+
+        // -----------------------------
+        // ONLY NOTES
+        // -----------------------------
+
+        const notes = allResources.filter(
+          (resource) =>
+            resource.type === "notes"
         );
+
+        setResources(notes);
+
       } catch (error) {
         console.error(
           "Error fetching notes:",
           error
         );
+
+        setResources([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNotes();
+    if (subjectId) {
+      fetchNotes();
+    }
   }, [subjectId]);
 
   return (
@@ -66,6 +88,7 @@ export default function Notes() {
 
       <div className="notes-container">
 
+        {/* BACK BUTTON */}
         <button
           className="back-button"
           onClick={() =>
@@ -78,6 +101,7 @@ export default function Notes() {
           Back to Resources
         </button>
 
+        {/* HEADER */}
         <div className="notes-header">
 
           <div className="notes-header-icon">
@@ -92,39 +116,51 @@ export default function Notes() {
             </h1>
 
             <p>
-              Read and download notes for this subject.
+              Read and download notes for this
+              subject.
             </p>
           </div>
 
         </div>
 
+        {/* CONTENT */}
         {loading ? (
+
           <div className="notes-message">
             <div className="loader"></div>
             <p>Loading notes...</p>
           </div>
+
         ) : resources.length === 0 ? (
+
           <div className="notes-message">
+
             <FileText size={45} />
 
             <h3>No notes available</h3>
 
             <p>
-              Notes for this subject have not been
-              added yet.
+              Notes for this subject have not
+              been added yet.
             </p>
+
           </div>
+
         ) : (
+
           <div className="notes-grid">
 
             {resources.map((resource) => (
+
               <ResourceCard
                 key={resource._id}
                 resource={resource}
               />
+
             ))}
 
           </div>
+
         )}
 
       </div>
