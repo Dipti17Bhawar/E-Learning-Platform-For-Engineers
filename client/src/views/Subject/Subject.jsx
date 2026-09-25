@@ -1,114 +1,142 @@
 import { useEffect, useState } from "react";
-
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  FileText,
-  GraduationCap,
-} from "lucide-react";
-
+import { ArrowLeft, ArrowRight, BookOpen, FileText, GraduationCap } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../../api/axios";
-
 import "./Subject.css";
+
 
 export default function Subject() {
   const { subjectId } = useParams();
   const navigate = useNavigate();
 
   const [subject, setSubject] = useState(null);
+  const [resources, setResources] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   useEffect(() => {
-    const fetchSubject = async () => {
+    const loadSubject = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const response = await api.get(
+        // Get subject
+        const subjectResponse = await api.get(
           `/subjects/${subjectId}`
         );
 
         setSubject(
-          response.data.subject ||
-            response.data
+          subjectResponse.data.subject ||
+          subjectResponse.data
         );
+
+
+        // Get resources belonging to this subject
+        const resourceResponse = await api.get(
+          `/resources/subject/${subjectId}`
+        );
+
+        const resourceData =
+          resourceResponse.data.resources ||
+          resourceResponse.data ||
+          [];
+
+        setResources(
+          Array.isArray(resourceData)
+            ? resourceData
+            : []
+        );
+
       } catch (err) {
-        console.error(
-          "Error fetching subject:",
-          err
-        );
+        console.error("Subject loading error:", err);
 
         setError(
           err.response?.data?.message ||
-            "Unable to load subject."
+          "Unable to load subject resources."
         );
+
       } finally {
         setLoading(false);
       }
     };
 
+
     if (subjectId) {
-      fetchSubject();
+      loadSubject();
     }
+
   }, [subjectId]);
 
-  /* ================================
-     LOADING
-  ================================= */
+
+  const notesCount = resources.filter(
+    (resource) => resource.type === "notes"
+  ).length;
+
+
+  const questionPapersCount = resources.filter(
+    (resource) => resource.type === "question-paper"
+  ).length;
+
+
+  const studyMaterialsCount = resources.filter(
+    (resource) => resource.type === "study-material"
+  ).length;
+
 
   if (loading) {
     return (
       <div className="subject-page">
-        <div className="subject-loading">
-          <div className="loader"></div>
+        <div className="subject-container">
           <p>Loading subject...</p>
         </div>
       </div>
     );
   }
 
-  /* ================================
-     ERROR
-  ================================= */
 
-  if (error || !subject) {
+  if (error) {
     return (
       <div className="subject-page">
-        <div className="subject-error">
-
-          <h2>Subject not found</h2>
-
-          <p>
-            {error ||
-              "The requested subject does not exist."}
-          </p>
+        <div className="subject-container">
 
           <button
+            className="back-button"
             onClick={() => navigate(-1)}
           >
-            Go Back
+            <ArrowLeft size={18} />
+            Back
           </button>
+
+          <div className="error-message">
+            {error}
+          </div>
 
         </div>
       </div>
     );
   }
 
-  /* ================================
-     SUBJECT PAGE
-  ================================= */
+
+  if (!subject) {
+    return (
+      <div className="subject-page">
+        <div className="subject-container">
+          <p>Subject not found.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="subject-page">
 
       <div className="subject-container">
 
-        {/* BACK BUTTON */}
-
+        {/* BACK */}
         <button
           className="back-button"
           onClick={() => navigate(-1)}
@@ -117,122 +145,140 @@ export default function Subject() {
           Back
         </button>
 
-        {/* SUBJECT HERO */}
 
-        <div className="subject-hero">
+        {/* SUBJECT HEADER */}
+        <div className="subject-header">
 
-          <div className="subject-hero-icon">
-            <BookOpen size={38} />
+          <div className="subject-icon">
+            <BookOpen size={42} />
           </div>
 
-          <div className="subject-hero-content">
+          <div>
 
             <span className="subject-label">
-              Subject
+              SUBJECT
             </span>
 
-            <h1>{subject.name}</h1>
+            <h1>
+              {subject.name}
+            </h1>
 
             <p>
               {subject.description ||
-                "Learn this subject with notes, question papers and study materials."}
+                "Study materials and resources for this subject."}
             </p>
 
           </div>
 
         </div>
 
-        {/* RESOURCES INTRO */}
 
-        <div className="resources-intro">
+        {/* RESOURCES */}
+        <div className="resources-heading">
 
           <div>
-
-            <h2>
-              Learning Resources
-            </h2>
+            <h2>Learning Resources</h2>
 
             <p>
-              Access all study materials
-              related to this subject.
+              Access all study materials related to this subject.
             </p>
-
           </div>
 
+
           <button
-            className="resources-main-button"
+            className="view-all-button"
             onClick={() =>
-              navigate(
-                `/subjects/${subjectId}/resources`
-              )
+              navigate(`/subject/${subjectId}/resources`)
             }
           >
             View All Resources
-
             <ArrowRight size={18} />
-
           </button>
 
         </div>
 
-        {/* RESOURCE PREVIEW */}
 
-        <div className="subject-resource-preview">
+        {/* RESOURCE CARDS */}
+        <div className="resource-grid">
+
 
           {/* NOTES */}
+          <div
+            className="resource-card"
+            onClick={() =>
+              navigate(`/subject/${subjectId}/notes`)
+            }
+          >
 
-          <div className="preview-card">
-
-            <div className="preview-icon notes-icon">
-              <FileText size={25} />
+            <div className="resource-icon notes-icon">
+              <FileText size={28} />
             </div>
 
-            <h3>
-              Notes
-            </h3>
+            <h3>Notes</h3>
 
             <p>
-              Study notes and learning
-              materials for this subject.
+              Study notes and learning materials for this subject.
             </p>
 
+            <strong>
+              {notesCount} {notesCount === 1 ? "resource" : "resources"}
+            </strong>
+
           </div>
+
 
           {/* QUESTION PAPERS */}
+          <div
+            className="resource-card"
+            onClick={() =>
+              navigate(`/subject/${subjectId}/question-papers`)
+            }
+          >
 
-          <div className="preview-card">
-
-            <div className="preview-icon qp-icon">
-              <FileText size={25} />
+            <div className="resource-icon qp-icon">
+              <FileText size={28} />
             </div>
 
-            <h3>
-              Question Papers
-            </h3>
+            <h3>Question Papers</h3>
 
             <p>
-              Previous year examination
-              papers for practice.
+              Previous year examination papers for practice.
             </p>
+
+            <strong>
+              {questionPapersCount}{" "}
+              {questionPapersCount === 1
+                ? "paper"
+                : "papers"}
+            </strong>
 
           </div>
 
+
           {/* STUDY MATERIAL */}
+          <div
+            className="resource-card"
+            onClick={() =>
+              navigate(`/subject/${subjectId}/study-materials`)
+            }
+          >
 
-          <div className="preview-card">
-
-            <div className="preview-icon study-material-icon">
-              <GraduationCap size={25} />
+            <div className="resource-icon study-icon">
+              <GraduationCap size={28} />
             </div>
 
-            <h3>
-              Study Materials
-            </h3>
+            <h3>Study Materials</h3>
 
             <p>
-              Additional study materials
-              for better preparation.
+              Additional study materials for better preparation.
             </p>
+
+            <strong>
+              {studyMaterialsCount}{" "}
+              {studyMaterialsCount === 1
+                ? "resource"
+                : "resources"}
+            </strong>
 
           </div>
 

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
@@ -11,22 +11,20 @@ import Dashboard from "./views/Dashboard/Dashboard";
 import BranchSubjects from "./views/BranchSubjects/BranchSubjects";
 import Subject from "./views/Subject/Subject";
 import Resources from "./views/Resources/Resources";
+import Notes from "./views/Notes/Notes";
+import QuestionPapers from "./views/QuestionPapers/QuestionPapers";
 import About from "./views/About/About";
 import Reviews from "./views/Reviews/Reviews";
 import NotFound from "./views/NotFound/NotFound";
 
 
-// ========================================
-// LAYOUT
-// ========================================
-
-function Layout({ children }) {
+function Layout() {
   return (
     <>
       <Navbar />
 
       <main className="main-content">
-        {children}
+        <Outlet />
       </main>
 
       <Footer />
@@ -35,24 +33,14 @@ function Layout({ children }) {
 }
 
 
-// ========================================
-// APP
-// ========================================
-
 export default function App() {
   return (
-    <Layout>
+    <Routes>
 
-      <Routes>
+      {/* PUBLIC ROUTES */}
+      <Route element={<Layout />}>
 
-        {/* ==================================
-            PUBLIC ROUTES
-        ================================== */}
-
-        <Route
-          path="/"
-          element={<Home />}
-        />
+        <Route path="/" element={<Home />} />
 
         <Route
           path="/login"
@@ -75,50 +63,64 @@ export default function App() {
         />
 
 
-        {/* ==================================
-            PROTECTED ROUTES
-        ================================== */}
-
+        {/* PROTECTED ROUTES */}
         <Route element={<ProtectedRoute />}>
 
-          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
 
-          {/* Branch Subjects */}
           <Route
             path="/branch/:code"
             element={<BranchSubjects />}
           />
 
-          {/* Subject Details */}
+          {/* SUBJECT */}
           <Route
             path="/subject/:subjectId"
             element={<Subject />}
           />
 
-          {/* Subject Resources */}
+          {/* ALL RESOURCES */}
           <Route
             path="/subject/:subjectId/resources"
             element={<Resources />}
           />
 
+          {/* NOTES */}
+          <Route
+            path="/subject/:subjectId/notes"
+            element={<Notes />}
+          />
+
+          {/* QUESTION PAPERS */}
+          <Route
+            path="/subject/:subjectId/question-papers"
+            element={<QuestionPapers />}
+          />
+
+          {/* STUDY MATERIALS */}
+          <Route
+            path="/subject/:subjectId/study-materials"
+            element={<Resources />}
+          />
+
         </Route>
 
-
-        {/* ==================================
-            404 PAGE
-        ================================== */}
-
+        {/* 404 */}
         <Route
-          path="*"
+          path="/404"
           element={<NotFound />}
         />
 
-      </Routes>
+        <Route
+          path="*"
+          element={<Navigate to="/404" replace />}
+        />
 
-    </Layout>
+      </Route>
+
+    </Routes>
   );
 }
