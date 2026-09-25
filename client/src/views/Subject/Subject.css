@@ -213,9 +213,11 @@
   color: #d97706;
 }
 
-.video-icon {
-  background: #fce7f3;
-  color: #db2777;
+/* Study Materials */
+
+.study-material-icon {
+  background: #ecfdf5;
+  color: #059669;
 }
 
 .preview-card h3 {
