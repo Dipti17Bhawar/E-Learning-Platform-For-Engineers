@@ -4,6 +4,8 @@ import {
   Phone,
 } from "lucide-react";
 
+import { Link } from "react-router-dom";
+
 import "./Footer.css";
 
 export default function Footer() {
@@ -12,8 +14,12 @@ export default function Footer() {
 
       <div className="footer-container">
 
+        {/* ========================================= */}
         {/* BRAND */}
+        {/* ========================================= */}
+
         <div className="footer-section footer-brand">
+
           <h3>TechSutra</h3>
 
           <p>
@@ -24,75 +30,135 @@ export default function Footer() {
             Learn smarter. Prepare better.
             Build your career.
           </p>
+
         </div>
 
 
+        {/* ========================================= */}
         {/* QUICK LINKS */}
+        {/* ========================================= */}
+
         <div className="footer-section">
+
           <h4>Quick Links</h4>
 
-          <a href="/">Home</a>
+          <Link to="/">
+            Home
+          </Link>
 
-          <a href="/about">About</a>
+          <Link to="/about">
+            About
+          </Link>
 
-          <a href="/reviews">Reviews</a>
+          <Link to="/reviews">
+            Reviews
+          </Link>
 
-          <a href="/dashboard">Dashboard</a>
+          <Link to="/dashboard">
+            Dashboard
+          </Link>
+
         </div>
 
 
+        {/* ========================================= */}
         {/* LEARNING */}
+        {/* ========================================= */}
+
         <div className="footer-section">
+
           <h4>Learning</h4>
 
-          <a href="/dashboard">
+          <Link to="/dashboard">
             Branches
-          </a>
+          </Link>
 
-          <a href="/dashboard">
+          <Link to="/dashboard">
             Subjects
-          </a>
+          </Link>
 
-          <a href="/dashboard">
+          <Link to="/dashboard">
             Notes
-          </a>
+          </Link>
 
-          <a href="/dashboard">
+          <Link to="/dashboard">
             Question Papers
-          </a>
+          </Link>
+
         </div>
 
 
+        {/* ========================================= */}
         {/* CONTACT */}
+        {/* ========================================= */}
+
         <div className="footer-section footer-contact">
+
           <h4>Contact Us</h4>
 
-          <p>
+
+          {/* LOCATION */}
+
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Maharashtra%2C%20India"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-contact-link"
+          >
+
             <MapPin size={17} />
+
             <span>
               Maharashtra, India
             </span>
-          </p>
 
-          <p>
+          </a>
+
+
+          {/* EMAIL */}
+
+          <a
+            href="mailto:support@techsutra.com"
+            className="footer-contact-link"
+          >
+
             <Mail size={17} />
+
             <span>
               support@techsutra.com
             </span>
-          </p>
 
-          <p>
+          </a>
+
+
+          {/* PHONE */}
+
+          <a
+            href="tel:+919876543210"
+            className="footer-contact-link"
+          >
+
             <Phone size={17} />
+
             <span>
-              +91 98765 43210
+              +91 1122334455
             </span>
-          </p>
+
+          </a>
+
+          <small className="footer-demo-text">
+            
+          </small>
+
         </div>
 
       </div>
 
 
+      {/* ========================================= */}
       {/* BOTTOM */}
+      {/* ========================================= */}
+
       <div className="footer-bottom">
 
         <p>
