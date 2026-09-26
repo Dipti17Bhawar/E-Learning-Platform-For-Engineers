@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+
 import {
   User,
   GraduationCap,
@@ -32,28 +33,32 @@ export default function Navbar() {
   return (
     <nav className="navbar">
 
-      {/* --------------------------------
-          LOGO
-      -------------------------------- */}
+      {/* ========================================= */}
+      {/* LOGO */}
+      {/* ========================================= */}
+
       <Link
         to="/"
         className="navbar-logo"
         onClick={closeMenu}
       >
         <div className="techsutra-logo-icon">
+
           <GraduationCap
             size={25}
             strokeWidth={2.5}
           />
+
         </div>
 
         <span>TechSutra</span>
       </Link>
 
 
-      {/* --------------------------------
-          DESKTOP NAVIGATION
-      -------------------------------- */}
+      {/* ========================================= */}
+      {/* DESKTOP NAVIGATION */}
+      {/* ========================================= */}
+
       <div className="navbar-center">
 
         <Link to="/">
@@ -71,13 +76,16 @@ export default function Navbar() {
       </div>
 
 
-      {/* --------------------------------
-          DESKTOP RIGHT
-      -------------------------------- */}
+      {/* ========================================= */}
+      {/* DESKTOP RIGHT */}
+      {/* ========================================= */}
+
       <div className="navbar-right">
 
         {user ? (
           <>
+            {/* USER AVATAR */}
+
             <Link
               to="/dashboard"
               className="user-avatar"
@@ -87,6 +95,19 @@ export default function Navbar() {
                 <User size={20} />
               )}
             </Link>
+
+
+            {/* DASHBOARD NAME */}
+
+            <Link
+              to="/dashboard"
+              className="dashboard-nav-link"
+            >
+              Dashboard
+            </Link>
+
+
+            {/* LOGOUT */}
 
             <button
               type="button"
@@ -98,12 +119,17 @@ export default function Navbar() {
           </>
         ) : (
           <>
+            {/* LOGIN */}
+
             <Link
               to="/login"
               className="login-link"
             >
               Login
             </Link>
+
+
+            {/* REGISTER */}
 
             <Link
               to="/register"
@@ -117,9 +143,10 @@ export default function Navbar() {
       </div>
 
 
-      {/* --------------------------------
-          HAMBURGER BUTTON
-      -------------------------------- */}
+      {/* ========================================= */}
+      {/* HAMBURGER BUTTON */}
+      {/* ========================================= */}
+
       <button
         type="button"
         className="hamburger-button"
@@ -137,9 +164,10 @@ export default function Navbar() {
       </button>
 
 
-      {/* --------------------------------
-          MOBILE MENU
-      -------------------------------- */}
+      {/* ========================================= */}
+      {/* MOBILE MENU */}
+      {/* ========================================= */}
+
       {menuOpen && (
         <div className="mobile-menu">
 
@@ -166,16 +194,23 @@ export default function Navbar() {
               Reviews
             </Link>
 
+
             {user ? (
               <>
+                {/* MOBILE DASHBOARD */}
+
                 <Link
                   to="/dashboard"
                   onClick={closeMenu}
                   className="mobile-dashboard"
                 >
                   <User size={18} />
+
                   Dashboard
                 </Link>
+
+
+                {/* MOBILE LOGOUT */}
 
                 <button
                   type="button"
@@ -211,4 +246,4 @@ export default function Navbar() {
 
     </nav>
   );
-} 
+}
