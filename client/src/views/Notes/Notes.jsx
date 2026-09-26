@@ -27,43 +27,60 @@ export default function Notes() {
   const [error, setError] = useState("");
 
   // --------------------------------------------------
-  // GET PDF URL
+  // GET GRIDFS PDF URL
   // --------------------------------------------------
   const getFileUrl = (resource) => {
-    if (!resource?.fileUrl) {
+    if (!resource) {
       return null;
     }
 
-    let fileUrl = String(resource.fileUrl).trim();
+    // -----------------------------------------------
+    // NEW GRIDFS METHOD
+    // Backend returns:
+    // /api/resources/file/<fileId>
+    // -----------------------------------------------
+    if (resource.fileId) {
+      return `${api.defaults.baseURL}/resources/file/${resource.fileId}`;
+    }
 
-    // Full URL
+    // -----------------------------------------------
+    // If backend already sends a complete URL
+    // -----------------------------------------------
     if (
-      fileUrl.startsWith("http://") ||
-      fileUrl.startsWith("https://")
+      resource.fileUrl &&
+      (
+        resource.fileUrl.startsWith("http://") ||
+        resource.fileUrl.startsWith("https://")
+      )
     ) {
-      return fileUrl.replace(
-        "/api/uploads/",
-        "/uploads/"
-      );
+      return resource.fileUrl;
     }
 
-    // Remove leading slash
-    fileUrl = fileUrl.replace(/^\/+/, "");
+    // -----------------------------------------------
+    // If fileUrl is already the GridFS API path
+    // -----------------------------------------------
+    if (
+      resource.fileUrl &&
+      resource.fileUrl.startsWith("/api/resources/file/")
+    ) {
+      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
 
-    // Remove api/ if accidentally stored
-    if (fileUrl.startsWith("api/uploads/")) {
-      fileUrl = fileUrl.replace(
-        "api/uploads/",
-        "uploads/"
-      );
+      return `${apiOrigin}${resource.fileUrl}`;
     }
 
-    // Add uploads/ if only filename is stored
-    if (!fileUrl.startsWith("uploads/")) {
-      fileUrl = `uploads/${fileUrl}`;
+    // -----------------------------------------------
+    // Old local uploads fallback
+    // -----------------------------------------------
+    if (
+      resource.fileUrl &&
+      resource.fileUrl.startsWith("/uploads/")
+    ) {
+      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
+
+      return `${apiOrigin}${resource.fileUrl}`;
     }
 
-    return `https://e-learning-platform-for-engineers-1.onrender.com/${fileUrl}`;
+    return null;
   };
 
   // --------------------------------------------------
@@ -192,7 +209,9 @@ export default function Notes() {
       document.createElement("a");
 
     link.href = fileUrl;
+
     link.target = "_blank";
+
     link.rel = "noopener noreferrer";
 
     link.download =
@@ -214,11 +233,17 @@ export default function Notes() {
     return (
       <div className="notes-page">
         <div className="notes-container">
+
           <div className="notes-message">
+
             <div className="loader"></div>
 
-            <p>Loading notes...</p>
+            <p>
+              Loading notes...
+            </p>
+
           </div>
+
         </div>
       </div>
     );
@@ -230,6 +255,7 @@ export default function Notes() {
   if (error) {
     return (
       <div className="notes-page">
+
         <div className="notes-container">
 
           <button
@@ -246,16 +272,21 @@ export default function Notes() {
           </button>
 
           <div className="notes-message">
+
             <FileText size={45} />
 
             <h3>
               Unable to load notes
             </h3>
 
-            <p>{error}</p>
+            <p>
+              {error}
+            </p>
+
           </div>
 
         </div>
+
       </div>
     );
   }
@@ -290,6 +321,7 @@ export default function Notes() {
           </div>
 
           <div>
+
             <span>
               Study Material
             </span>
@@ -302,6 +334,7 @@ export default function Notes() {
               Read and download notes
               for this subject.
             </p>
+
           </div>
 
         </div>
@@ -347,7 +380,11 @@ export default function Notes() {
 
                     {/* ICON */}
                     <div className="note-icon">
-                      <FileText size={28} />
+
+                      <FileText
+                        size={28}
+                      />
+
                     </div>
 
                     {/* CONTENT */}
@@ -381,7 +418,9 @@ export default function Notes() {
                         type="button"
                         className="view-button"
                         onClick={() =>
-                          handleView(resource)
+                          handleView(
+                            resource
+                          )
                         }
                         disabled={!fileUrl}
                       >
@@ -401,7 +440,9 @@ export default function Notes() {
                         }
                         disabled={!fileUrl}
                       >
-                        <Download size={17} />
+                        <Download
+                          size={17}
+                        />
 
                         Download
                       </button>
@@ -414,6 +455,7 @@ export default function Notes() {
             )}
 
           </div>
+
         )}
 
       </div>

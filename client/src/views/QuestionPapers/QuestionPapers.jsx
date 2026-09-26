@@ -22,36 +22,98 @@ export default function QuestionPapers() {
 
   const [resources, setResources] = useState([]);
   const [subject, setSubject] = useState(null);
-
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchQuestionPapers = async () => {
       try {
-        const [subjectResponse, resourceResponse] =
-          await Promise.all([
-            api.get(`/subjects/${subjectId}`),
+        setLoading(true);
+        setError("");
 
-            api.get(
-              `/resources/subject/${subjectId}?type=qp`
-            ),
-          ]);
+        if (!subjectId) {
+          setError("Subject ID is missing.");
+          return;
+        }
 
-        setSubject(
-          subjectResponse.data.subject ||
-            subjectResponse.data
+        console.log(
+          "Question Papers Subject ID:",
+          subjectId
         );
 
-        setResources(
+        const [
+          subjectResponse,
+          resourceResponse,
+        ] = await Promise.all([
+          api.get(`/subjects/${subjectId}`),
+
+          api.get(
+            `/resources/subject/${subjectId}`
+          ),
+        ]);
+
+        // --------------------------------------------
+        // SUBJECT
+        // --------------------------------------------
+        const subjectData =
+          subjectResponse.data?.subject ||
+          subjectResponse.data;
+
+        setSubject(subjectData);
+
+        // --------------------------------------------
+        // ALL RESOURCES
+        // --------------------------------------------
+        const allResources =
           Array.isArray(resourceResponse.data)
             ? resourceResponse.data
-            : resourceResponse.data.resources || []
+            : resourceResponse.data?.resources ||
+              [];
+
+        console.log(
+          "All resources:",
+          allResources
         );
+
+        // --------------------------------------------
+        // ONLY QUESTION PAPERS
+        // --------------------------------------------
+        const questionPapers =
+          allResources.filter(
+            (resource) =>
+              resource.type === "question-paper"
+          );
+
+        console.log(
+          "Question papers:",
+          questionPapers
+        );
+
+        setResources(questionPapers);
+
       } catch (error) {
         console.error(
           "Error fetching question papers:",
           error
         );
+
+        console.error(
+          "Status:",
+          error.response?.status
+        );
+
+        console.error(
+          "Response:",
+          error.response?.data
+        );
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to load question papers."
+        );
+
+        setResources([]);
+
       } finally {
         setLoading(false);
       }
@@ -65,6 +127,7 @@ export default function QuestionPapers() {
 
       <div className="qps-container">
 
+        {/* BACK BUTTON */}
         <button
           className="back-button"
           onClick={() =>
@@ -74,9 +137,11 @@ export default function QuestionPapers() {
           }
         >
           <ArrowLeft size={18} />
+
           Back to Resources
         </button>
 
+        {/* HEADER */}
         <div className="qps-header">
 
           <div className="qps-header-icon">
@@ -84,46 +149,95 @@ export default function QuestionPapers() {
           </div>
 
           <div>
-            <span>Practice Material</span>
+
+            <span>
+              Practice Material
+            </span>
 
             <h1>
-              {subject?.name || "Subject"} Question Papers
+              {subject?.name || "Subject"}{" "}
+              Question Papers
             </h1>
 
             <p>
               Practice previous year and important
               question papers.
             </p>
+
           </div>
 
         </div>
 
-        {loading ? (
+        {/* ERROR */}
+        {error ? (
+
           <div className="qps-message">
-            <div className="loader"></div>
-            <p>Loading question papers...</p>
-          </div>
-        ) : resources.length === 0 ? (
-          <div className="qps-message">
+
             <FileText size={45} />
 
-            <h3>No question papers available</h3>
+            <h3>
+              Unable to load question papers
+            </h3>
 
             <p>
-              Question papers have not been added yet.
+              {error}
             </p>
+
           </div>
+
+        ) : loading ? (
+
+          /* LOADING */
+          <div className="qps-message">
+
+            <div className="loader"></div>
+
+            <p>
+              Loading question papers...
+            </p>
+
+          </div>
+
+        ) : resources.length === 0 ? (
+
+          /* NO QUESTION PAPERS */
+          <div className="qps-message">
+
+            <FileText size={45} />
+
+            <h3>
+              No question papers available
+            </h3>
+
+            <p>
+              Question papers have not been
+              added yet.
+            </p>
+
+          </div>
+
         ) : (
+
+          /* QUESTION PAPERS GRID */
           <div className="qps-grid">
 
-            {resources.map((resource) => (
-              <ResourceCard
-                key={resource._id}
-                resource={resource}
-              />
-            ))}
+            {resources.map(
+              (resource, index) => (
+
+                <ResourceCard
+                  key={
+                    resource._id ||
+                    resource.id ||
+                    index
+                  }
+                  resource={resource}
+                />
+
+              )
+            )}
 
           </div>
+
         )}
 
       </div>

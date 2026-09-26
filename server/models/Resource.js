@@ -30,6 +30,13 @@ const resourceSchema = new mongoose.Schema(
       required: true,
     },
 
+    // MongoDB GridFS file ID
+    fileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+    },
+
+    // URL used by the frontend to open the PDF
     fileUrl: {
       type: String,
       required: true,
