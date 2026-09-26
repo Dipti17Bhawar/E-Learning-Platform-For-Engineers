@@ -14,16 +14,16 @@ dotenv.config();
 
 const app = express();
 
-// -----------------------------
-// ES MODULE PATH SETUP
-// -----------------------------
+// --------------------------------------------------
+// ES MODULE PATH
+// --------------------------------------------------
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// -----------------------------
+// --------------------------------------------------
 // MIDDLEWARE
-// -----------------------------
+// --------------------------------------------------
 
 app.use(
   cors({
@@ -35,15 +35,16 @@ app.use(
 );
 
 app.use(express.json());
+
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
 
-// -----------------------------
-// UPLOADS
-// -----------------------------
+// --------------------------------------------------
+// PDF UPLOADS
+// --------------------------------------------------
 
 app.use(
   "/uploads",
@@ -52,9 +53,9 @@ app.use(
   )
 );
 
-// -----------------------------
+// --------------------------------------------------
 // ROOT
-// -----------------------------
+// --------------------------------------------------
 
 app.get("/", (req, res) => {
   res.json({
@@ -64,34 +65,48 @@ app.get("/", (req, res) => {
   });
 });
 
-// -----------------------------
+// --------------------------------------------------
 // API ROUTES
-// -----------------------------
+// --------------------------------------------------
 
-app.use("/api/users", userRoutes);
+app.use(
+  "/api/users",
+  userRoutes
+);
 
-app.use("/api/branches", branchRoutes);
+app.use(
+  "/api/branches",
+  branchRoutes
+);
 
-app.use("/api/subjects", subjectRoutes);
+app.use(
+  "/api/subjects",
+  subjectRoutes
+);
 
-app.use("/api/resources", resourceRoutes);
+app.use(
+  "/api/resources",
+  resourceRoutes
+);
 
-// -----------------------------
+// --------------------------------------------------
 // 404
-// -----------------------------
+// --------------------------------------------------
 
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: "API route not found.",
+    path: req.originalUrl,
   });
 });
 
-// -----------------------------
-// START SERVER
-// -----------------------------
+// --------------------------------------------------
+// SERVER
+// --------------------------------------------------
 
-const PORT = process.env.PORT || 5000;
+const PORT =
+  process.env.PORT || 5000;
 
 async function startServer() {
   try {
@@ -117,9 +132,10 @@ async function startServer() {
 
     app.listen(PORT, () => {
       console.log(
-        `Server running on http://localhost:${PORT}`
+        `Server running on port ${PORT}`
       );
     });
+
   } catch (error) {
     console.error(
       "Server startup error:",

@@ -27,7 +27,7 @@ export default function Notes() {
   const [error, setError] = useState("");
 
   // --------------------------------------------------
-  // GET FILE URL
+  // GET PDF URL
   // --------------------------------------------------
   const getFileUrl = (resource) => {
     if (!resource?.fileUrl) {
@@ -36,81 +36,34 @@ export default function Notes() {
 
     let fileUrl = String(resource.fileUrl).trim();
 
-    console.log(
-      "Original fileUrl from MongoDB:",
-      fileUrl
-    );
-
-    // ------------------------------------------------
-    // CASE 1:
-    // Full URL already stored
-    // ------------------------------------------------
+    // Full URL
     if (
       fileUrl.startsWith("http://") ||
       fileUrl.startsWith("https://")
     ) {
-      // Fix old incorrect URL:
-      // /api/uploads/file.pdf
-      fileUrl = fileUrl.replace(
+      return fileUrl.replace(
         "/api/uploads/",
         "/uploads/"
       );
-
-      console.log(
-        "Final file URL:",
-        fileUrl
-      );
-
-      return fileUrl;
     }
 
-    // ------------------------------------------------
     // Remove leading slash
-    // Example:
-    // /uploads/file.pdf
-    // becomes:
-    // uploads/file.pdf
-    // ------------------------------------------------
     fileUrl = fileUrl.replace(/^\/+/, "");
 
-    // ------------------------------------------------
-    // CASE 2:
-    // api/uploads/file.pdf
-    // ------------------------------------------------
-    if (
-      fileUrl.startsWith("api/uploads/")
-    ) {
+    // Remove api/ if accidentally stored
+    if (fileUrl.startsWith("api/uploads/")) {
       fileUrl = fileUrl.replace(
         "api/uploads/",
         "uploads/"
       );
     }
 
-    // ------------------------------------------------
-    // CASE 3:
-    // uploads/file.pdf
-    // ------------------------------------------------
-    if (
-      !fileUrl.startsWith("uploads/")
-    ) {
-      // ------------------------------------------------
-      // CASE 4:
-      // Only filename stored
-      // Example:
-      // unit-1.pdf
-      // ------------------------------------------------
+    // Add uploads/ if only filename is stored
+    if (!fileUrl.startsWith("uploads/")) {
       fileUrl = `uploads/${fileUrl}`;
     }
 
-    const finalUrl =
-      `https://e-learning-platform-for-engineers-1.onrender.com/${fileUrl}`;
-
-    console.log(
-      "Final file URL:",
-      finalUrl
-    );
-
-    return finalUrl;
+    return `https://e-learning-platform-for-engineers-1.onrender.com/${fileUrl}`;
   };
 
   // --------------------------------------------------
@@ -123,21 +76,11 @@ export default function Notes() {
         setError("");
 
         if (!subjectId) {
-          setError(
-            "Subject ID is missing."
-          );
+          setError("Subject ID is missing.");
           return;
         }
 
-        console.log(
-          "Fetching subject:",
-          subjectId
-        );
-
-        console.log(
-          "Fetching resources for subject:",
-          subjectId
-        );
+        console.log("Subject ID:", subjectId);
 
         const [
           subjectResponse,
@@ -160,7 +103,7 @@ export default function Notes() {
         setSubject(subjectData);
 
         // ------------------------------------------------
-        // RESOURCES
+        // ALL RESOURCES
         // ------------------------------------------------
         const allResources =
           Array.isArray(resourceResponse.data)
@@ -176,31 +119,32 @@ export default function Notes() {
         // ------------------------------------------------
         // ONLY NOTES
         // ------------------------------------------------
-        const notes =
-          allResources.filter(
-            (resource) =>
-              resource.type === "notes"
-          );
-
-        console.log(
-          "Notes:",
-          notes
+        const notes = allResources.filter(
+          (resource) =>
+            resource.type === "notes"
         );
+
+        console.log("Notes:", notes);
 
         setResources(notes);
-      } catch (error) {
+      } catch (err) {
         console.error(
           "Error fetching notes:",
-          error
+          err
         );
 
         console.error(
-          "API error response:",
-          error.response?.data
+          "Status:",
+          err.response?.status
+        );
+
+        console.error(
+          "Response:",
+          err.response?.data
         );
 
         setError(
-          error.response?.data?.message ||
+          err.response?.data?.message ||
             "Unable to load notes."
         );
 
@@ -217,29 +161,14 @@ export default function Notes() {
   // VIEW PDF
   // --------------------------------------------------
   const handleView = (resource) => {
-    const fileUrl =
-      getFileUrl(resource);
+    const fileUrl = getFileUrl(resource);
 
     if (!fileUrl) {
-      alert(
-        "PDF file is not available."
-      );
+      alert("PDF file is not available.");
       return;
     }
 
-    console.log(
-      "================================"
-    );
-
-    console.log(
-      "VIEW FILE URL:"
-    );
-
-    console.log(fileUrl);
-
-    console.log(
-      "================================"
-    );
+    console.log("Opening PDF:", fileUrl);
 
     window.open(
       fileUrl,
@@ -252,39 +181,19 @@ export default function Notes() {
   // DOWNLOAD PDF
   // --------------------------------------------------
   const handleDownload = (resource) => {
-    const fileUrl =
-      getFileUrl(resource);
+    const fileUrl = getFileUrl(resource);
 
     if (!fileUrl) {
-      alert(
-        "PDF file is not available."
-      );
+      alert("PDF file is not available.");
       return;
     }
-
-    console.log(
-      "================================"
-    );
-
-    console.log(
-      "DOWNLOAD FILE URL:"
-    );
-
-    console.log(fileUrl);
-
-    console.log(
-      "================================"
-    );
 
     const link =
       document.createElement("a");
 
     link.href = fileUrl;
-
     link.target = "_blank";
-
-    link.rel =
-      "noopener noreferrer";
+    link.rel = "noopener noreferrer";
 
     link.download =
       resource.fileName ||
@@ -305,17 +214,11 @@ export default function Notes() {
     return (
       <div className="notes-page">
         <div className="notes-container">
-
           <div className="notes-message">
-
             <div className="loader"></div>
 
-            <p>
-              Loading notes...
-            </p>
-
+            <p>Loading notes...</p>
           </div>
-
         </div>
       </div>
     );
@@ -327,7 +230,6 @@ export default function Notes() {
   if (error) {
     return (
       <div className="notes-page">
-
         <div className="notes-container">
 
           <button
@@ -344,21 +246,16 @@ export default function Notes() {
           </button>
 
           <div className="notes-message">
-
             <FileText size={45} />
 
             <h3>
               Unable to load notes
             </h3>
 
-            <p>
-              {error}
-            </p>
-
+            <p>{error}</p>
           </div>
 
         </div>
-
       </div>
     );
   }
@@ -389,28 +286,22 @@ export default function Notes() {
         <div className="notes-header">
 
           <div className="notes-header-icon">
-
             <BookOpen size={30} />
-
           </div>
 
           <div>
-
             <span>
               Study Material
             </span>
 
             <h1>
-              {subject?.name ||
-                "Subject"}{" "}
-              Notes
+              {subject?.name || "Subject"} Notes
             </h1>
 
             <p>
               Read and download notes
               for this subject.
             </p>
-
           </div>
 
         </div>
@@ -442,9 +333,7 @@ export default function Notes() {
               (resource, index) => {
 
                 const fileUrl =
-                  getFileUrl(
-                    resource
-                  );
+                  getFileUrl(resource);
 
                 return (
                   <div
@@ -458,11 +347,7 @@ export default function Notes() {
 
                     {/* ICON */}
                     <div className="note-icon">
-
-                      <FileText
-                        size={28}
-                      />
-
+                      <FileText size={28} />
                     </div>
 
                     {/* CONTENT */}
@@ -470,9 +355,7 @@ export default function Notes() {
 
                       <h3>
                         {resource.title ||
-                          `Unit ${
-                            index + 1
-                          }`}
+                          `Unit ${index + 1}`}
                       </h3>
 
                       <p>
@@ -484,9 +367,7 @@ export default function Notes() {
 
                       {resource.fileName && (
                         <small>
-                          {
-                            resource.fileName
-                          }
+                          {resource.fileName}
                         </small>
                       )}
 
@@ -500,21 +381,13 @@ export default function Notes() {
                         type="button"
                         className="view-button"
                         onClick={() =>
-                          handleView(
-                            resource
-                          )
+                          handleView(resource)
                         }
-                        disabled={
-                          !fileUrl
-                        }
+                        disabled={!fileUrl}
                       >
-
-                        <Eye
-                          size={17}
-                        />
+                        <Eye size={17} />
 
                         View
-
                       </button>
 
                       {/* DOWNLOAD */}
@@ -526,17 +399,11 @@ export default function Notes() {
                             resource
                           )
                         }
-                        disabled={
-                          !fileUrl
-                        }
+                        disabled={!fileUrl}
                       >
-
-                        <Download
-                          size={17}
-                        />
+                        <Download size={17} />
 
                         Download
-
                       </button>
 
                     </div>
@@ -547,7 +414,6 @@ export default function Notes() {
             )}
 
           </div>
-
         )}
 
       </div>

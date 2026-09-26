@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://e-learning-platform-for-engineers-1.onrender.com/api",
+  baseURL:
+    "https://e-learning-platform-for-engineers-1.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -17,9 +18,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
