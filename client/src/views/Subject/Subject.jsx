@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
+
 import {
   ArrowLeft,
   BookOpen,
   FileText,
-  GraduationCap,
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import api from "../../api/axios";
+
 import "./Subject.css";
 
 export default function Subject() {
@@ -52,7 +57,10 @@ export default function Subject() {
             : []
         );
       } catch (err) {
-        console.error("Subject loading error:", err);
+        console.error(
+          "Subject loading error:",
+          err
+        );
 
         setError(
           err.response?.data?.message ||
@@ -68,17 +76,24 @@ export default function Subject() {
     }
   }, [subjectId]);
 
+  // --------------------------------------------
+  // RESOURCE COUNTS
+  // --------------------------------------------
+
   const notesCount = resources.filter(
-    (resource) => resource.type === "notes"
+    (resource) =>
+      resource.type === "notes"
   ).length;
 
-  const questionPapersCount = resources.filter(
-    (resource) => resource.type === "question-paper"
-  ).length;
+  const questionPapersCount =
+    resources.filter(
+      (resource) =>
+        resource.type === "question-paper"
+    ).length;
 
-  const studyMaterialsCount = resources.filter(
-    (resource) => resource.type === "study-material"
-  ).length;
+  // --------------------------------------------
+  // LOADING
+  // --------------------------------------------
 
   if (loading) {
     return (
@@ -90,17 +105,22 @@ export default function Subject() {
     );
   }
 
+  // --------------------------------------------
+  // ERROR
+  // --------------------------------------------
+
   if (error) {
     return (
       <div className="subject-page">
         <div className="subject-container">
 
           <button
+            type="button"
             className="back-button"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={18} />
-            Back
+            Back to All Subjects
           </button>
 
           <div className="error-message">
@@ -112,28 +132,50 @@ export default function Subject() {
     );
   }
 
+  // --------------------------------------------
+  // SUBJECT NOT FOUND
+  // --------------------------------------------
+
   if (!subject) {
     return (
       <div className="subject-page">
         <div className="subject-container">
-          <p>Subject not found.</p>
+
+          <button
+            type="button"
+            className="back-button"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={18} />
+            Back to All Subjects
+          </button>
+
+          <p>
+            Subject not found.
+          </p>
+
         </div>
       </div>
     );
   }
+
+  // --------------------------------------------
+  // MAIN PAGE
+  // --------------------------------------------
 
   return (
     <div className="subject-page">
 
       <div className="subject-container">
 
-        {/* BACK */}
+        {/* BACK TO ALL SUBJECTS */}
         <button
+          type="button"
           className="back-button"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft size={18} />
-          Back
+          Back to All Subjects
         </button>
 
 
@@ -156,7 +198,7 @@ export default function Subject() {
 
             <p>
               {subject.description ||
-                "Study materials and resources for this subject."}
+                "Study resources for this subject."}
             </p>
 
           </div>
@@ -168,11 +210,16 @@ export default function Subject() {
         <div className="resources-heading">
 
           <div>
-            <h2>Learning Resources</h2>
+
+            <h2>
+              Learning Resources
+            </h2>
 
             <p>
-              Select a resource category to continue learning.
+              Select a resource category to
+              continue learning.
             </p>
+
           </div>
 
         </div>
@@ -185,7 +232,9 @@ export default function Subject() {
           <div
             className="resource-card"
             onClick={() =>
-              navigate(`/subject/${subjectId}/notes`)
+              navigate(
+                `/subject/${subjectId}/notes`
+              )
             }
           >
 
@@ -193,11 +242,13 @@ export default function Subject() {
               <FileText size={28} />
             </div>
 
-            <h3>Notes</h3>
+            <h3>
+              Notes
+            </h3>
 
             <p>
-              Study notes and learning materials
-              for this subject.
+              Study notes and learning
+              materials for this subject.
             </p>
 
             <strong>
@@ -224,11 +275,13 @@ export default function Subject() {
               <FileText size={28} />
             </div>
 
-            <h3>Question Papers</h3>
+            <h3>
+              Question Papers
+            </h3>
 
             <p>
-              Previous year examination papers
-              for practice.
+              Previous year examination
+              papers for practice.
             </p>
 
             <strong>
@@ -236,37 +289,6 @@ export default function Subject() {
               {questionPapersCount === 1
                 ? "paper"
                 : "papers"}
-            </strong>
-
-          </div>
-
-
-          {/* STUDY MATERIALS */}
-          <div
-            className="resource-card"
-            onClick={() =>
-              navigate(
-                `/subject/${subjectId}/study-materials`
-              )
-            }
-          >
-
-            <div className="resource-icon study-icon">
-              <GraduationCap size={28} />
-            </div>
-
-            <h3>Study Materials</h3>
-
-            <p>
-              Additional study materials for
-              better preparation.
-            </p>
-
-            <strong>
-              {studyMaterialsCount}{" "}
-              {studyMaterialsCount === 1
-                ? "resource"
-                : "resources"}
             </strong>
 
           </div>

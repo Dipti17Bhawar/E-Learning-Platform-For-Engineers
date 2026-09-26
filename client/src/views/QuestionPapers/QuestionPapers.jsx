@@ -127,18 +127,17 @@ export default function QuestionPapers() {
 
       <div className="qps-container">
 
-        {/* BACK BUTTON */}
+        {/* BACK TO SUBJECT */}
         <button
+          type="button"
           className="back-button"
           onClick={() =>
-            navigate(
-              `/subjects/${subjectId}/resources`
-            )
+            navigate(`/subject/${subjectId}`)
           }
         >
           <ArrowLeft size={18} />
 
-          Back to Resources
+          Back to Subject
         </button>
 
         {/* HEADER */}
