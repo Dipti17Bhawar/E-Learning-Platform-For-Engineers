@@ -13,6 +13,7 @@ export default function ResourceCard({ resource }) {
   // --------------------------------------------------
   // GET PDF URL
   // --------------------------------------------------
+
   const getFileUrl = () => {
     if (!resource) {
       return null;
@@ -21,6 +22,7 @@ export default function ResourceCard({ resource }) {
     // ------------------------------------------------
     // NEW GRIDFS FILE
     // ------------------------------------------------
+
     if (resource.fileId) {
       return `${api.defaults.baseURL}/resources/file/${resource.fileId}`;
     }
@@ -28,6 +30,7 @@ export default function ResourceCard({ resource }) {
     // ------------------------------------------------
     // FULL URL
     // ------------------------------------------------
+
     if (
       resource.fileUrl &&
       (resource.fileUrl.startsWith("http://") ||
@@ -38,9 +41,11 @@ export default function ResourceCard({ resource }) {
 
     // ------------------------------------------------
     // GRIDFS API PATH
+    //
     // Example:
     // /api/resources/file/6ab7816df24910f54d574f8a
     // ------------------------------------------------
+
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/api/resources/file/")
@@ -52,7 +57,11 @@ export default function ResourceCard({ resource }) {
 
     // ------------------------------------------------
     // OLD LOCAL UPLOADS FALLBACK
+    //
+    // Example:
+    // /uploads/example.pdf
     // ------------------------------------------------
+
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/uploads/")
@@ -70,8 +79,9 @@ export default function ResourceCard({ resource }) {
   // --------------------------------------------------
   // ICON
   // --------------------------------------------------
+
   const getIcon = () => {
-    if (resource.type === "question-paper") {
+    if (resource?.type === "question-paper") {
       return <FileText size={26} />;
     }
 
@@ -81,8 +91,9 @@ export default function ResourceCard({ resource }) {
   // --------------------------------------------------
   // TYPE NAME
   // --------------------------------------------------
+
   const getTypeName = () => {
-    if (resource.type === "question-paper") {
+    if (resource?.type === "question-paper") {
       return "Question Paper";
     }
 
@@ -90,8 +101,9 @@ export default function ResourceCard({ resource }) {
   };
 
   // --------------------------------------------------
-  // VIEW
+  // VIEW PDF
   // --------------------------------------------------
+
   const handleView = () => {
     if (!fileUrl) {
       alert("PDF file is not available.");
@@ -108,22 +120,46 @@ export default function ResourceCard({ resource }) {
   };
 
   // --------------------------------------------------
-  // DOWNLOAD
+  // DOWNLOAD PDF DIRECTLY
   // --------------------------------------------------
+
   const handleDownload = () => {
     if (!fileUrl) {
       alert("PDF file is not available.");
       return;
     }
 
+    /*
+      Add download=true to the GridFS URL.
+
+      Example:
+
+      /api/resources/file/12345
+
+      becomes:
+
+      /api/resources/file/12345?download=true
+
+      The backend will then send:
+      Content-Disposition: attachment
+    */
+
+    const separator = fileUrl.includes("?")
+      ? "&"
+      : "?";
+
+    const downloadUrl =
+      `${fileUrl}${separator}download=true`;
+
+    console.log("Downloading PDF:", downloadUrl);
+
     const link = document.createElement("a");
 
-    link.href = fileUrl;
+    link.href = downloadUrl;
 
     link.download =
       resource.fileName ||
-      resource.title ||
-      "resource.pdf";
+      `${resource.title || "resource"}.pdf`;
 
     document.body.appendChild(link);
 
@@ -132,11 +168,19 @@ export default function ResourceCard({ resource }) {
     document.body.removeChild(link);
   };
 
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
+
   return (
     <div className="resource-card">
 
+      {/* -------------------------------------------- */}
       {/* HEADER */}
+      {/* -------------------------------------------- */}
+
       <div className="resource-card-header">
+
         <div className="resource-card-icon">
           {getIcon()}
         </div>
@@ -144,34 +188,58 @@ export default function ResourceCard({ resource }) {
         <span className="resource-card-type">
           {getTypeName()}
         </span>
+
       </div>
 
+      {/* -------------------------------------------- */}
       {/* CONTENT */}
+      {/* -------------------------------------------- */}
+
       <div className="resource-card-content">
-        <h3>{resource.title}</h3>
+
+        <h3>
+          {resource?.title || "Untitled Resource"}
+        </h3>
 
         <p>
-          {resource.description ||
+          {resource?.description ||
             "Access this learning resource."}
         </p>
 
-        {resource.fileName && (
+        {/* File name */}
+
+        {resource?.fileName && (
           <small>
             {resource.fileName}
           </small>
         )}
 
-        {resource.year && (
+        {/* Year */}
+
+        {resource?.year && (
           <small>
             Year: {resource.year}
           </small>
         )}
+
+        {/* Semester */}
+
+        {resource?.semester && (
+          <small>
+            Semester: {resource.semester}
+          </small>
+        )}
+
       </div>
 
+      {/* -------------------------------------------- */}
       {/* ACTIONS */}
+      {/* -------------------------------------------- */}
+
       <div className="resource-card-actions">
 
         {/* VIEW */}
+
         <button
           type="button"
           className="resource-view-button"
@@ -179,10 +247,12 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <ExternalLink size={17} />
+
           View
         </button>
 
         {/* DOWNLOAD */}
+
         <button
           type="button"
           className="resource-download-button"
@@ -190,10 +260,12 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <Download size={17} />
+
           Download
         </button>
 
       </div>
+
     </div>
   );
 }

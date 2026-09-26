@@ -16,7 +16,10 @@ const resourceSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ["notes", "question-paper"],
+      enum: [
+        "notes",
+        "question-paper",
+      ],
       required: true,
     },
 
@@ -54,7 +57,13 @@ const resourceSchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model("Resource", resourceSchema);
+export default mongoose.model(
+  "Resource",
+  resourceSchema
+);

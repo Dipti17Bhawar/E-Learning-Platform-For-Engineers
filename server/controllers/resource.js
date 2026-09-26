@@ -1,15 +1,19 @@
-import Resource from "../models/Resource.js";
 import mongoose from "mongoose";
-import { Readable } from "stream";
-
+import Resource from "../models/Resource.js";
 import { getGridFSBucket } from "../config/gridfs.js";
 
-// ============================================
-// CREATE RESOURCE
-// ============================================
 
-export async function createResource(req, res) {
+// ==================================================
+// CREATE RESOURCE
+// ==================================================
+
+export const createResource = async (req, res) => {
   try {
+    console.log("========== CREATE RESOURCE ==========");
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("=====================================");
+
     const {
       title,
       description,
@@ -19,119 +23,116 @@ export async function createResource(req, res) {
       semester,
     } = req.body;
 
+    // ----------------------------------------------
+    // VALIDATION
+    // ----------------------------------------------
+
     if (!title || !type || !subject) {
       return res.status(400).json({
         success: false,
-        message: "Title, type and subject are required",
+        message: "Title, type and subject are required.",
       });
     }
 
-    if (
-      ![
-        "notes",
-        "question-paper",
-        "study-material",
-      ].includes(type)
-    ) {
+    if (!["notes", "question-paper"].includes(type)) {
       return res.status(400).json({
         success: false,
         message:
-          "Type must be notes, question-paper or study-material",
+          "Type must be either notes or question-paper.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(subject)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid subject ID.",
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "PDF file is required",
+        message: "PDF file is required.",
       });
     }
 
-    // ============================================
-    // UPLOAD PDF TO MONGODB GRIDFS
-    // ============================================
+    // ----------------------------------------------
+    // GET GRIDFS BUCKET
+    // ----------------------------------------------
 
     const bucket = getGridFSBucket();
 
-    const fileId = await new Promise(
-      (resolve, reject) => {
-        const uploadStream =
-          bucket.openUploadStream(
-            req.file.originalname,
-            {
-              metadata: {
-                contentType:
-                  req.file.mimetype,
-              },
-            }
-          );
+    // ----------------------------------------------
+    // UPLOAD FILE TO GRIDFS
+    // ----------------------------------------------
 
-        uploadStream.on(
-          "finish",
-          () => {
-            resolve(uploadStream.id);
-          }
-        );
-
-        uploadStream.on(
-          "error",
-          (error) => {
-            reject(error);
-          }
-        );
-
-        Readable.from(
-          req.file.buffer
-        ).pipe(uploadStream);
+    const uploadStream = bucket.openUploadStream(
+      req.file.originalname,
+      {
+        metadata: {
+          contentType:
+            req.file.mimetype || "application/pdf",
+        },
       }
     );
 
-    console.log(
-      "GridFS file uploaded:",
-      fileId
-    );
+    uploadStream.end(req.file.buffer);
 
-    // ============================================
-    // CREATE RESOURCE DOCUMENT
-    // ============================================
+    // ----------------------------------------------
+    // WAIT FOR GRIDFS UPLOAD
+    // ----------------------------------------------
 
-    const resource =
-      await Resource.create({
-        title: title.trim(),
+    uploadStream.on("error", (error) => {
+      console.error(
+        "GridFS upload error:",
+        error
+      );
+    });
 
-        description:
-          description?.trim() || "",
+    await new Promise((resolve, reject) => {
+      uploadStream.on("finish", resolve);
+      uploadStream.on("error", reject);
+    });
 
-        type,
+    // ----------------------------------------------
+    // CREATE RESOURCE RECORD
+    // ----------------------------------------------
 
-        subject,
+    const resource = await Resource.create({
+      title: title.trim(),
 
-        fileId,
+      description:
+        description?.trim() || "",
 
-        fileUrl:
-          `/api/resources/file/${fileId}`,
+      type,
 
-        fileName:
-          req.file.originalname,
+      subject,
 
-        year:
-          year
-            ? Number(year)
-            : undefined,
+      fileId: uploadStream.id,
 
-        semester:
-          semester
-            ? Number(semester)
-            : undefined,
+      fileUrl:
+        `/api/resources/file/${uploadStream.id}`,
 
-        isActive: true,
-      });
+      fileName: req.file.originalname,
+
+      year: year
+        ? Number(year)
+        : undefined,
+
+      semester: semester
+        ? Number(semester)
+        : undefined,
+
+      isActive: true,
+    });
+
+    // ----------------------------------------------
+    // RESPONSE
+    // ----------------------------------------------
 
     return res.status(201).json({
       success: true,
-
-      message:
-        "Resource added successfully",
+      message: "Resource added successfully.",
 
       resource,
     });
@@ -144,35 +145,25 @@ export async function createResource(req, res) {
 
     return res.status(500).json({
       success: false,
-
       message:
         error.message ||
-        "Failed to create resource",
+        "Failed to create resource.",
     });
   }
-}
+};
 
 
-// ============================================
+// ==================================================
 // GET ALL RESOURCES
-// ============================================
+// ==================================================
 
-export async function getAllResources(
-  req,
-  res
-) {
+export const getAllResources = async (req, res) => {
   try {
-    const resources =
-      await Resource.find({
-        isActive: true,
-      })
-        .populate(
-          "subject",
-          "name code"
-        )
-        .sort({
-          createdAt: -1,
-        });
+    const resources = await Resource.find({
+      isActive: true,
+    })
+      .populate("subject", "name code")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -181,53 +172,47 @@ export async function getAllResources(
 
   } catch (error) {
     console.error(
-      "Get resources error:",
+      "Get all resources error:",
       error
     );
 
     return res.status(500).json({
       success: false,
       message:
-        "Failed to fetch resources",
+        "Failed to fetch resources.",
     });
   }
-}
+};
 
 
-// ============================================
+// ==================================================
 // GET RESOURCES BY SUBJECT
-// ============================================
+// ==================================================
 
-export async function getResourcesBySubject(
+export const getResourcesBySubject = async (
   req,
   res
-) {
+) => {
   try {
-    const { subjectId } =
-      req.params;
+    const { subjectId } = req.params;
 
-    if (!subjectId) {
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
       return res.status(400).json({
         success: false,
-        message:
-          "Subject ID is required",
+        message: "Invalid subject ID.",
       });
     }
 
-    const resources =
-      await Resource.find({
-        subject: subjectId,
-        isActive: true,
-      })
-        .populate(
-          "subject",
-          "name code"
-        )
-        .sort({
-          type: 1,
-          year: -1,
-          createdAt: -1,
-        });
+    const resources = await Resource.find({
+      subject: subjectId,
+      isActive: true,
+    })
+      .populate("subject", "name code")
+      .sort({
+        type: 1,
+        year: -1,
+        createdAt: -1,
+      });
 
     return res.status(200).json({
       success: true,
@@ -243,36 +228,37 @@ export async function getResourcesBySubject(
     return res.status(500).json({
       success: false,
       message:
-        "Failed to fetch subject resources",
+        "Failed to fetch subject resources.",
     });
   }
-}
+};
 
 
-// ============================================
+// ==================================================
 // GET SINGLE RESOURCE
-// ============================================
+// ==================================================
 
-export async function getResourceById(
+export const getResourceById = async (
   req,
   res
-) {
+) => {
   try {
-    const { id } =
-      req.params;
+    const { id } = req.params;
 
-    const resource =
-      await Resource.findById(id)
-        .populate(
-          "subject",
-          "name code"
-        );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid resource ID.",
+      });
+    }
+
+    const resource = await Resource.findById(id)
+      .populate("subject", "name code");
 
     if (!resource) {
       return res.status(404).json({
         success: false,
-        message:
-          "Resource not found",
+        message: "Resource not found.",
       });
     }
 
@@ -290,96 +276,120 @@ export async function getResourceById(
     return res.status(500).json({
       success: false,
       message:
-        "Failed to fetch resource",
+        "Failed to fetch resource.",
     });
   }
-}
+};
 
 
-// ============================================
-// VIEW / DOWNLOAD PDF FROM GRIDFS
-// ============================================
+// ==================================================
+// GET FILE FROM GRIDFS
+// ==================================================
 
-export async function getResourceFile(
+export const getResourceFile = async (
   req,
   res
-) {
+) => {
   try {
-    const { id } =
-      req.params;
+    const { id } = req.params;
 
-    // Validate ObjectId
-    if (
-      !mongoose.Types.ObjectId.isValid(
-        id
-      )
-    ) {
+    // ----------------------------------------------
+    // VALIDATE FILE ID
+    // ----------------------------------------------
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message:
-          "Invalid file ID",
+        message: "Invalid file ID.",
       });
     }
 
-    const fileId =
-      new mongoose.Types.ObjectId(id);
+    const fileId = new mongoose.Types.ObjectId(id);
 
-    const bucket =
-      getGridFSBucket();
+    // ----------------------------------------------
+    // GET GRIDFS BUCKET
+    // ----------------------------------------------
 
-    // Find file in GridFS
-    const files =
-      await bucket
-        .find({
-          _id: fileId,
-        })
-        .toArray();
+    const bucket = getGridFSBucket();
 
-    if (!files.length) {
+    // ----------------------------------------------
+    // FIND FILE
+    // ----------------------------------------------
+
+    const file = await bucket
+      .find({
+        _id: fileId,
+      })
+      .next();
+
+    if (!file) {
       return res.status(404).json({
         success: false,
-        message:
-          "PDF file not found",
+        message: "File not found.",
       });
     }
 
-    const file = files[0];
+    // ----------------------------------------------
+    // CHECK DOWNLOAD REQUEST
+    // ----------------------------------------------
 
-    // PDF content type
-    res.set(
+    const isDownload =
+      req.query.download === "true";
+
+    // ----------------------------------------------
+    // CONTENT TYPE
+    // ----------------------------------------------
+
+    res.setHeader(
       "Content-Type",
-      "application/pdf"
+      file.metadata?.contentType ||
+        "application/pdf"
     );
 
-    // Open PDF in browser
-    res.set(
-      "Content-Disposition",
-      `inline; filename="${file.filename}"`
-    );
+    // ----------------------------------------------
+    // SAFE FILE NAME
+    // ----------------------------------------------
 
-    // Stream file from GridFS
+    const safeFileName = String(
+      file.filename || "resource.pdf"
+    ).replace(/"/g, '\\"');
+
+    // ----------------------------------------------
+    // VIEW OR DOWNLOAD
+    // ----------------------------------------------
+
+    if (isDownload) {
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${safeFileName}"`
+      );
+    } else {
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${safeFileName}"`
+      );
+    }
+
+    // ----------------------------------------------
+    // STREAM FILE
+    // ----------------------------------------------
+
     const downloadStream =
-      bucket.openDownloadStream(
-        fileId
+      bucket.openDownloadStream(fileId);
+
+    downloadStream.on("error", (error) => {
+      console.error(
+        "GridFS download stream error:",
+        error
       );
 
-    downloadStream.on(
-      "error",
-      (error) => {
-        console.error(
-          "GridFS download error:",
-          error
-        );
-
-        if (!res.headersSent) {
-          res.status(500).json({
-            success: false,
-            message:
-              "Failed to load PDF",
-          });
-        }
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "Unable to read file.",
+        });
       }
-    );
+    });
 
     downloadStream.pipe(res);
 
@@ -389,26 +399,34 @@ export async function getResourceFile(
       error
     );
 
-    return res.status(500).json({
-      success: false,
-      message:
-        "Failed to load PDF",
-    });
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Server error while retrieving file.",
+      });
+    }
   }
-}
+};
 
 
-// ============================================
+// ==================================================
 // DELETE RESOURCE
-// ============================================
+// ==================================================
 
-export async function deleteResource(
+export const deleteResource = async (
   req,
   res
-) {
+) => {
   try {
-    const { id } =
-      req.params;
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid resource ID.",
+      });
+    }
 
     const resource =
       await Resource.findById(id);
@@ -416,55 +434,47 @@ export async function deleteResource(
     if (!resource) {
       return res.status(404).json({
         success: false,
-        message:
-          "Resource not found",
+        message: "Resource not found.",
       });
     }
 
-    // ============================================
-    // DELETE PDF FROM GRIDFS
-    // ============================================
+    // ----------------------------------------------
+    // DELETE GRIDFS FILE
+    // ----------------------------------------------
 
     if (resource.fileId) {
       try {
-        const bucket =
-          getGridFSBucket();
-
-        const fileId =
-          new mongoose.Types.ObjectId(
-            resource.fileId
-          );
+        const bucket = getGridFSBucket();
 
         await bucket.delete(
-          fileId
+          new mongoose.Types.ObjectId(
+            resource.fileId
+          )
         );
 
         console.log(
           "GridFS file deleted:",
-          fileId
+          resource.fileId
         );
 
-      } catch (gridfsError) {
+      } catch (fileError) {
         console.error(
-          "GridFS delete error:",
-          gridfsError
+          "GridFS file delete error:",
+          fileError
         );
       }
     }
 
-    // ============================================
+    // ----------------------------------------------
     // DELETE RESOURCE DOCUMENT
-    // ============================================
+    // ----------------------------------------------
 
-    await Resource.findByIdAndDelete(
-      id
-    );
+    await Resource.findByIdAndDelete(id);
 
     return res.status(200).json({
       success: true,
-
       message:
-        "Resource deleted successfully",
+        "Resource deleted successfully.",
     });
 
   } catch (error) {
@@ -475,9 +485,8 @@ export async function deleteResource(
 
     return res.status(500).json({
       success: false,
-
       message:
-        "Failed to delete resource",
+        "Failed to delete resource.",
     });
   }
-}
+};
