@@ -9,6 +9,7 @@ import {
 import {
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 
 import api from "../../api/axios";
@@ -18,6 +19,10 @@ import "./Subject.css";
 export default function Subject() {
   const { subjectId } = useParams();
   const navigate = useNavigate();
+
+  // Get branch code from URL
+  const [searchParams] = useSearchParams();
+  const branchCode = searchParams.get("branch");
 
   const [subject, setSubject] = useState(null);
   const [resources, setResources] = useState([]);
@@ -30,6 +35,11 @@ export default function Subject() {
       try {
         setLoading(true);
         setError("");
+
+        if (!subjectId) {
+          setError("Subject ID is missing.");
+          return;
+        }
 
         // Get subject
         const subjectResponse = await api.get(
@@ -71,10 +81,21 @@ export default function Subject() {
       }
     };
 
-    if (subjectId) {
-      loadSubject();
-    }
+    loadSubject();
   }, [subjectId]);
+
+  // --------------------------------------------
+  // GO BACK TO BRANCH SUBJECTS
+  // --------------------------------------------
+
+  const goToAllSubjects = () => {
+    if (branchCode) {
+      navigate(`/branch/${branchCode}`);
+    } else {
+      // Fallback if branch code is missing
+      navigate("/dashboard");
+    }
+  };
 
   // --------------------------------------------
   // RESOURCE COUNTS
@@ -99,7 +120,18 @@ export default function Subject() {
     return (
       <div className="subject-page">
         <div className="subject-container">
+
+          <button
+            type="button"
+            className="back-button"
+            onClick={goToAllSubjects}
+          >
+            <ArrowLeft size={18} />
+            Back to All Subjects
+          </button>
+
           <p>Loading subject...</p>
+
         </div>
       </div>
     );
@@ -112,12 +144,13 @@ export default function Subject() {
   if (error) {
     return (
       <div className="subject-page">
+
         <div className="subject-container">
 
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate(-1)}
+            onClick={goToAllSubjects}
           >
             <ArrowLeft size={18} />
             Back to All Subjects
@@ -128,6 +161,7 @@ export default function Subject() {
           </div>
 
         </div>
+
       </div>
     );
   }
@@ -139,12 +173,13 @@ export default function Subject() {
   if (!subject) {
     return (
       <div className="subject-page">
+
         <div className="subject-container">
 
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate(-1)}
+            onClick={goToAllSubjects}
           >
             <ArrowLeft size={18} />
             Back to All Subjects
@@ -155,6 +190,7 @@ export default function Subject() {
           </p>
 
         </div>
+
       </div>
     );
   }
@@ -172,7 +208,7 @@ export default function Subject() {
         <button
           type="button"
           className="back-button"
-          onClick={() => navigate(-1)}
+          onClick={goToAllSubjects}
         >
           <ArrowLeft size={18} />
           Back to All Subjects
@@ -233,7 +269,7 @@ export default function Subject() {
             className="resource-card"
             onClick={() =>
               navigate(
-                `/subject/${subjectId}/notes`
+                `/subject/${subjectId}/notes?branch=${branchCode}`
               )
             }
           >
@@ -266,7 +302,7 @@ export default function Subject() {
             className="resource-card"
             onClick={() =>
               navigate(
-                `/subject/${subjectId}/question-papers`
+                `/subject/${subjectId}/question-papers?branch=${branchCode}`
               )
             }
           >
