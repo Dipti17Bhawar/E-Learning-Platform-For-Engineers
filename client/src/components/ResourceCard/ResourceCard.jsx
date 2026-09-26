@@ -10,7 +10,6 @@ import api from "../../api/axios";
 import "./ResourceCard.css";
 
 export default function ResourceCard({ resource }) {
-
   // --------------------------------------------------
   // GET PDF URL
   // --------------------------------------------------
@@ -31,10 +30,8 @@ export default function ResourceCard({ resource }) {
     // ------------------------------------------------
     if (
       resource.fileUrl &&
-      (
-        resource.fileUrl.startsWith("http://") ||
-        resource.fileUrl.startsWith("https://")
-      )
+      (resource.fileUrl.startsWith("http://") ||
+        resource.fileUrl.startsWith("https://"))
     ) {
       return resource.fileUrl;
     }
@@ -46,15 +43,9 @@ export default function ResourceCard({ resource }) {
     // ------------------------------------------------
     if (
       resource.fileUrl &&
-      resource.fileUrl.startsWith(
-        "/api/resources/file/"
-      )
+      resource.fileUrl.startsWith("/api/resources/file/")
     ) {
-      const apiOrigin =
-        api.defaults.baseURL.replace(
-          /\/api\/?$/,
-          ""
-        );
+      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
 
       return `${apiOrigin}${resource.fileUrl}`;
     }
@@ -66,11 +57,7 @@ export default function ResourceCard({ resource }) {
       resource.fileUrl &&
       resource.fileUrl.startsWith("/uploads/")
     ) {
-      const apiOrigin =
-        api.defaults.baseURL.replace(
-          /\/api\/?$/,
-          ""
-        );
+      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
 
       return `${apiOrigin}${resource.fileUrl}`;
     }
@@ -84,9 +71,7 @@ export default function ResourceCard({ resource }) {
   // ICON
   // --------------------------------------------------
   const getIcon = () => {
-    if (
-      resource.type === "question-paper"
-    ) {
+    if (resource.type === "question-paper") {
       return <FileText size={26} />;
     }
 
@@ -97,16 +82,8 @@ export default function ResourceCard({ resource }) {
   // TYPE NAME
   // --------------------------------------------------
   const getTypeName = () => {
-    if (
-      resource.type === "question-paper"
-    ) {
+    if (resource.type === "question-paper") {
       return "Question Paper";
-    }
-
-    if (
-      resource.type === "study-material"
-    ) {
-      return "Study Material";
     }
 
     return "Notes";
@@ -121,10 +98,7 @@ export default function ResourceCard({ resource }) {
       return;
     }
 
-    console.log(
-      "Opening PDF:",
-      fileUrl
-    );
+    console.log("Opening PDF:", fileUrl);
 
     window.open(
       fileUrl,
@@ -142,8 +116,7 @@ export default function ResourceCard({ resource }) {
       return;
     }
 
-    const link =
-      document.createElement("a");
+    const link = document.createElement("a");
 
     link.href = fileUrl;
 
@@ -164,7 +137,6 @@ export default function ResourceCard({ resource }) {
 
       {/* HEADER */}
       <div className="resource-card-header">
-
         <div className="resource-card-icon">
           {getIcon()}
         </div>
@@ -172,15 +144,11 @@ export default function ResourceCard({ resource }) {
         <span className="resource-card-type">
           {getTypeName()}
         </span>
-
       </div>
 
       {/* CONTENT */}
       <div className="resource-card-content">
-
-        <h3>
-          {resource.title}
-        </h3>
+        <h3>{resource.title}</h3>
 
         <p>
           {resource.description ||
@@ -198,7 +166,6 @@ export default function ResourceCard({ resource }) {
             Year: {resource.year}
           </small>
         )}
-
       </div>
 
       {/* ACTIONS */}
@@ -212,7 +179,6 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <ExternalLink size={17} />
-
           View
         </button>
 
@@ -224,12 +190,10 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <Download size={17} />
-
           Download
         </button>
 
       </div>
-
     </div>
   );
 }
