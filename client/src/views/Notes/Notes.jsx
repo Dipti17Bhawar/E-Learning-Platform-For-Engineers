@@ -26,42 +26,165 @@ export default function Notes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =========================================
-  // GET SUBJECT + NOTES
-  // =========================================
+  // --------------------------------------------------
+  // GET FILE URL
+  // --------------------------------------------------
+  const getFileUrl = (resource) => {
+    if (!resource?.fileUrl) {
+      return null;
+    }
+
+    let fileUrl = String(resource.fileUrl).trim();
+
+    console.log(
+      "Original fileUrl from MongoDB:",
+      fileUrl
+    );
+
+    // ------------------------------------------------
+    // CASE 1:
+    // Full URL already stored
+    // ------------------------------------------------
+    if (
+      fileUrl.startsWith("http://") ||
+      fileUrl.startsWith("https://")
+    ) {
+      // Fix old incorrect URL:
+      // /api/uploads/file.pdf
+      fileUrl = fileUrl.replace(
+        "/api/uploads/",
+        "/uploads/"
+      );
+
+      console.log(
+        "Final file URL:",
+        fileUrl
+      );
+
+      return fileUrl;
+    }
+
+    // ------------------------------------------------
+    // Remove leading slash
+    // Example:
+    // /uploads/file.pdf
+    // becomes:
+    // uploads/file.pdf
+    // ------------------------------------------------
+    fileUrl = fileUrl.replace(/^\/+/, "");
+
+    // ------------------------------------------------
+    // CASE 2:
+    // api/uploads/file.pdf
+    // ------------------------------------------------
+    if (
+      fileUrl.startsWith("api/uploads/")
+    ) {
+      fileUrl = fileUrl.replace(
+        "api/uploads/",
+        "uploads/"
+      );
+    }
+
+    // ------------------------------------------------
+    // CASE 3:
+    // uploads/file.pdf
+    // ------------------------------------------------
+    if (
+      !fileUrl.startsWith("uploads/")
+    ) {
+      // ------------------------------------------------
+      // CASE 4:
+      // Only filename stored
+      // Example:
+      // unit-1.pdf
+      // ------------------------------------------------
+      fileUrl = `uploads/${fileUrl}`;
+    }
+
+    const finalUrl =
+      `https://e-learning-platform-for-engineers-1.onrender.com/${fileUrl}`;
+
+    console.log(
+      "Final file URL:",
+      finalUrl
+    );
+
+    return finalUrl;
+  };
+
+  // --------------------------------------------------
+  // FETCH SUBJECT + NOTES
+  // --------------------------------------------------
   useEffect(() => {
     const fetchNotes = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const [subjectResponse, resourceResponse] =
-          await Promise.all([
-            api.get(`/subjects/${subjectId}`),
-            api.get(`/resources/subject/${subjectId}`),
-          ]);
+        if (!subjectId) {
+          setError(
+            "Subject ID is missing."
+          );
+          return;
+        }
 
-        // =========================================
-        // SUBJECT
-        // =========================================
-        setSubject(
-          subjectResponse.data.subject ||
-            subjectResponse.data
+        console.log(
+          "Fetching subject:",
+          subjectId
         );
 
-        // =========================================
-        // ALL RESOURCES
-        // =========================================
+        console.log(
+          "Fetching resources for subject:",
+          subjectId
+        );
+
+        const [
+          subjectResponse,
+          resourceResponse,
+        ] = await Promise.all([
+          api.get(`/subjects/${subjectId}`),
+
+          api.get(
+            `/resources/subject/${subjectId}`
+          ),
+        ]);
+
+        // ------------------------------------------------
+        // SUBJECT
+        // ------------------------------------------------
+        const subjectData =
+          subjectResponse.data?.subject ||
+          subjectResponse.data;
+
+        setSubject(subjectData);
+
+        // ------------------------------------------------
+        // RESOURCES
+        // ------------------------------------------------
         const allResources =
           Array.isArray(resourceResponse.data)
             ? resourceResponse.data
-            : resourceResponse.data.resources || [];
+            : resourceResponse.data?.resources ||
+              [];
 
-        // =========================================
+        console.log(
+          "All resources:",
+          allResources
+        );
+
+        // ------------------------------------------------
         // ONLY NOTES
-        // =========================================
-        const notes = allResources.filter(
-          (resource) => resource.type === "notes"
+        // ------------------------------------------------
+        const notes =
+          allResources.filter(
+            (resource) =>
+              resource.type === "notes"
+          );
+
+        console.log(
+          "Notes:",
+          notes
         );
 
         setResources(notes);
@@ -69,6 +192,11 @@ export default function Notes() {
         console.error(
           "Error fetching notes:",
           error
+        );
+
+        console.error(
+          "API error response:",
+          error.response?.data
         );
 
         setError(
@@ -82,85 +210,35 @@ export default function Notes() {
       }
     };
 
-    if (subjectId) {
-      fetchNotes();
-    }
+    fetchNotes();
   }, [subjectId]);
 
-  // =========================================
-  // GET COMPLETE PDF URL
-  // =========================================
-  const getFileUrl = (resource) => {
-    if (!resource?.fileUrl) {
-      return null;
-    }
-
-    let fileUrl = String(
-      resource.fileUrl
-    ).trim();
-
-    // -----------------------------------------
-    // Already a complete URL
-    // -----------------------------------------
-    if (
-      fileUrl.startsWith("http://") ||
-      fileUrl.startsWith("https://")
-    ) {
-      // Fix incorrect old URLs such as:
-      // /api/uploads/unit-1.pdf
-      fileUrl = fileUrl.replace(
-        "/api/uploads/",
-        "/uploads/"
-      );
-
-      return fileUrl;
-    }
-
-    // -----------------------------------------
-    // Remove leading slash
-    // -----------------------------------------
-    fileUrl = fileUrl.replace(/^\/+/, "");
-
-    // -----------------------------------------
-    // Fix:
-    // api/uploads/unit-1.pdf
-    // -----------------------------------------
-    fileUrl = fileUrl.replace(
-      /^api\/uploads\//,
-      "uploads/"
-    );
-
-    // -----------------------------------------
-    // If only filename is stored:
-    // unit-1.pdf
-    //
-    // Convert it to:
-    // uploads/unit-1.pdf
-    // -----------------------------------------
-    if (!fileUrl.startsWith("uploads/")) {
-      fileUrl = `uploads/${fileUrl}`;
-    }
-
-    // -----------------------------------------
-    // Final Render backend URL
-    // -----------------------------------------
-    return `https://e-learning-platform-for-engineers-1.onrender.com/${fileUrl}`;
-  };
-
-  // =========================================
+  // --------------------------------------------------
   // VIEW PDF
-  // =========================================
+  // --------------------------------------------------
   const handleView = (resource) => {
-    const fileUrl = getFileUrl(resource);
+    const fileUrl =
+      getFileUrl(resource);
 
     if (!fileUrl) {
-      alert("PDF file is not available.");
+      alert(
+        "PDF file is not available."
+      );
       return;
     }
 
     console.log(
-      "Opening PDF:",
-      fileUrl
+      "================================"
+    );
+
+    console.log(
+      "VIEW FILE URL:"
+    );
+
+    console.log(fileUrl);
+
+    console.log(
+      "================================"
     );
 
     window.open(
@@ -170,20 +248,32 @@ export default function Notes() {
     );
   };
 
-  // =========================================
+  // --------------------------------------------------
   // DOWNLOAD PDF
-  // =========================================
+  // --------------------------------------------------
   const handleDownload = (resource) => {
-    const fileUrl = getFileUrl(resource);
+    const fileUrl =
+      getFileUrl(resource);
 
     if (!fileUrl) {
-      alert("PDF file is not available.");
+      alert(
+        "PDF file is not available."
+      );
       return;
     }
 
     console.log(
-      "Downloading PDF:",
-      fileUrl
+      "================================"
+    );
+
+    console.log(
+      "DOWNLOAD FILE URL:"
+    );
+
+    console.log(fileUrl);
+
+    console.log(
+      "================================"
     );
 
     const link =
@@ -193,7 +283,8 @@ export default function Notes() {
 
     link.target = "_blank";
 
-    link.rel = "noopener noreferrer";
+    link.rel =
+      "noopener noreferrer";
 
     link.download =
       resource.fileName ||
@@ -207,9 +298,9 @@ export default function Notes() {
     document.body.removeChild(link);
   };
 
-  // =========================================
+  // --------------------------------------------------
   // LOADING
-  // =========================================
+  // --------------------------------------------------
   if (loading) {
     return (
       <div className="notes-page">
@@ -230,12 +321,13 @@ export default function Notes() {
     );
   }
 
-  // =========================================
+  // --------------------------------------------------
   // ERROR
-  // =========================================
+  // --------------------------------------------------
   if (error) {
     return (
       <div className="notes-page">
+
         <div className="notes-container">
 
           <button
@@ -266,21 +358,20 @@ export default function Notes() {
           </div>
 
         </div>
+
       </div>
     );
   }
 
-  // =========================================
-  // PAGE
-  // =========================================
+  // --------------------------------------------------
+  // MAIN PAGE
+  // --------------------------------------------------
   return (
     <div className="notes-page">
 
       <div className="notes-container">
 
-        {/* =====================================
-            BACK BUTTON
-        ====================================== */}
+        {/* BACK BUTTON */}
         <button
           className="back-button"
           onClick={() =>
@@ -294,9 +385,7 @@ export default function Notes() {
           Back to Subject
         </button>
 
-        {/* =====================================
-            HEADER
-        ====================================== */}
+        {/* HEADER */}
         <div className="notes-header">
 
           <div className="notes-header-icon">
@@ -312,21 +401,21 @@ export default function Notes() {
             </span>
 
             <h1>
-              {subject?.name || "Subject"} Notes
+              {subject?.name ||
+                "Subject"}{" "}
+              Notes
             </h1>
 
             <p>
-              Read and download notes for this
-              subject.
+              Read and download notes
+              for this subject.
             </p>
 
           </div>
 
         </div>
 
-        {/* =====================================
-            NOTES
-        ====================================== */}
+        {/* NO NOTES */}
         {resources.length === 0 ? (
 
           <div className="notes-message">
@@ -338,32 +427,36 @@ export default function Notes() {
             </h3>
 
             <p>
-              Notes for this subject have not
-              been added yet.
+              Notes for this subject
+              have not been added yet.
             </p>
 
           </div>
 
         ) : (
 
+          /* NOTES GRID */
           <div className="notes-grid">
 
             {resources.map(
               (resource, index) => {
 
                 const fileUrl =
-                  getFileUrl(resource);
+                  getFileUrl(
+                    resource
+                  );
 
                 return (
-
                   <div
                     className="note-card"
-                    key={resource._id}
+                    key={
+                      resource._id ||
+                      resource.id ||
+                      index
+                    }
                   >
 
-                    {/* =================================
-                        ICON
-                    ================================== */}
+                    {/* ICON */}
                     <div className="note-icon">
 
                       <FileText
@@ -372,9 +465,7 @@ export default function Notes() {
 
                     </div>
 
-                    {/* =================================
-                        CONTENT
-                    ================================== */}
+                    {/* CONTENT */}
                     <div className="note-content">
 
                       <h3>
@@ -393,18 +484,18 @@ export default function Notes() {
 
                       {resource.fileName && (
                         <small>
-                          {resource.fileName}
+                          {
+                            resource.fileName
+                          }
                         </small>
                       )}
 
                     </div>
 
-                    {/* =================================
-                        ACTIONS
-                    ================================== */}
+                    {/* ACTIONS */}
                     <div className="note-actions">
 
-                      {/* VIEW BUTTON */}
+                      {/* VIEW */}
                       <button
                         type="button"
                         className="view-button"
@@ -413,16 +504,20 @@ export default function Notes() {
                             resource
                           )
                         }
-                        disabled={!fileUrl}
+                        disabled={
+                          !fileUrl
+                        }
                       >
 
-                        <Eye size={17} />
+                        <Eye
+                          size={17}
+                        />
 
                         View
 
                       </button>
 
-                      {/* DOWNLOAD BUTTON */}
+                      {/* DOWNLOAD */}
                       <button
                         type="button"
                         className="download-button"
@@ -431,7 +526,9 @@ export default function Notes() {
                             resource
                           )
                         }
-                        disabled={!fileUrl}
+                        disabled={
+                          !fileUrl
+                        }
                       >
 
                         <Download
@@ -445,7 +542,6 @@ export default function Notes() {
                     </div>
 
                   </div>
-
                 );
               }
             )}
