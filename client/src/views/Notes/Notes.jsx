@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 import {
@@ -27,55 +28,47 @@ export default function Notes() {
   const [error, setError] = useState("");
 
   // --------------------------------------------------
-  // GET GRIDFS PDF URL
+  // GET PDF URL
   // --------------------------------------------------
+
   const getFileUrl = (resource) => {
     if (!resource) {
       return null;
     }
 
-    // -----------------------------------------------
-    // NEW GRIDFS METHOD
-    // Backend returns:
-    // /api/resources/file/<fileId>
-    // -----------------------------------------------
+    // GridFS file
     if (resource.fileId) {
       return `${api.defaults.baseURL}/resources/file/${resource.fileId}`;
     }
 
-    // -----------------------------------------------
-    // If backend already sends a complete URL
-    // -----------------------------------------------
+    // Full URL
     if (
       resource.fileUrl &&
-      (
-        resource.fileUrl.startsWith("http://") ||
-        resource.fileUrl.startsWith("https://")
-      )
+      /^https?:\/\//i.test(resource.fileUrl)
     ) {
       return resource.fileUrl;
     }
 
-    // -----------------------------------------------
-    // If fileUrl is already the GridFS API path
-    // -----------------------------------------------
+    // GridFS API path
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/api/resources/file/")
     ) {
-      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
+      const apiOrigin = (
+        api.defaults.baseURL || ""
+      ).replace(/\/api\/?$/, "");
 
       return `${apiOrigin}${resource.fileUrl}`;
     }
 
-    // -----------------------------------------------
-    // Old local uploads fallback
-    // -----------------------------------------------
+    // Older local uploads
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/uploads/")
     ) {
-      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
+      const apiOrigin = (
+        api.defaults.baseURL || ""
+      ).replace(/\/api\/?$/, "");
 
       return `${apiOrigin}${resource.fileUrl}`;
     }
@@ -84,8 +77,9 @@ export default function Notes() {
   };
 
   // --------------------------------------------------
-  // FETCH SUBJECT + NOTES
+  // FETCH SUBJECT AND NOTES
   // --------------------------------------------------
+
   useEffect(() => {
     const fetchNotes = async () => {
       try {
@@ -97,68 +91,38 @@ export default function Notes() {
           return;
         }
 
-        console.log("Subject ID:", subjectId);
-
         const [
           subjectResponse,
           resourceResponse,
         ] = await Promise.all([
           api.get(`/subjects/${subjectId}`),
-
-          api.get(
-            `/resources/subject/${subjectId}`
-          ),
+          api.get(`/resources/subject/${subjectId}`),
         ]);
 
-        // ------------------------------------------------
-        // SUBJECT
-        // ------------------------------------------------
+        // Subject details
         const subjectData =
           subjectResponse.data?.subject ||
           subjectResponse.data;
 
         setSubject(subjectData);
 
-        // ------------------------------------------------
-        // ALL RESOURCES
-        // ------------------------------------------------
-        const allResources =
-          Array.isArray(resourceResponse.data)
-            ? resourceResponse.data
-            : resourceResponse.data?.resources ||
-              [];
+        // All resources
+        const allResources = Array.isArray(
+          resourceResponse.data
+        )
+          ? resourceResponse.data
+          : resourceResponse.data?.resources || [];
 
-        console.log(
-          "All resources:",
-          allResources
-        );
-
-        // ------------------------------------------------
-        // ONLY NOTES
-        // ------------------------------------------------
+        // Only notes
         const notes = allResources.filter(
-          (resource) =>
-            resource.type === "notes"
+          (resource) => resource.type === "notes"
         );
-
-        console.log("Notes:", notes);
 
         setResources(notes);
       } catch (err) {
-        console.error(
-          "Error fetching notes:",
-          err
-        );
-
-        console.error(
-          "Status:",
-          err.response?.status
-        );
-
-        console.error(
-          "Response:",
-          err.response?.data
-        );
+        console.error("Error fetching notes:", err);
+        console.error("Status:", err.response?.status);
+        console.error("Response:", err.response?.data);
 
         setError(
           err.response?.data?.message ||
@@ -175,8 +139,9 @@ export default function Notes() {
   }, [subjectId]);
 
   // --------------------------------------------------
-  // VIEW PDF
+  // VIEW PDF IN A NEW TAB
   // --------------------------------------------------
+
   const handleView = (resource) => {
     const fileUrl = getFileUrl(resource);
 
@@ -184,8 +149,6 @@ export default function Notes() {
       alert("PDF file is not available.");
       return;
     }
-
-    console.log("Opening PDF:", fileUrl);
 
     window.open(
       fileUrl,
@@ -195,8 +158,9 @@ export default function Notes() {
   };
 
   // --------------------------------------------------
-  // DOWNLOAD PDF
+  // DOWNLOAD PDF WITHOUT OPENING A NEW TAB
   // --------------------------------------------------
+
   const handleDownload = (resource) => {
     const fileUrl = getFileUrl(resource);
 
@@ -205,45 +169,35 @@ export default function Notes() {
       return;
     }
 
-    const link =
-      document.createElement("a");
+    // Tell the backend to send the file as an attachment.
+    const separator = fileUrl.includes("?") ? "&" : "?";
+    const downloadUrl = `${fileUrl}${separator}download=true`;
 
-    link.href = fileUrl;
+    const link = document.createElement("a");
 
-    link.target = "_blank";
-
-    link.rel = "noopener noreferrer";
-
+    link.href = downloadUrl;
     link.download =
       resource.fileName ||
-      resource.title ||
-      "notes.pdf";
+      `${resource.title || "notes"}.pdf`;
 
+    // No target="_blank": do not intentionally open a new tab.
     document.body.appendChild(link);
-
     link.click();
-
-    document.body.removeChild(link);
+    link.remove();
   };
 
   // --------------------------------------------------
   // LOADING
   // --------------------------------------------------
+
   if (loading) {
     return (
       <div className="notes-page">
         <div className="notes-container">
-
           <div className="notes-message">
-
             <div className="loader"></div>
-
-            <p>
-              Loading notes...
-            </p>
-
+            <p>Loading notes...</p>
           </div>
-
         </div>
       </div>
     );
@@ -252,41 +206,28 @@ export default function Notes() {
   // --------------------------------------------------
   // ERROR
   // --------------------------------------------------
+
   if (error) {
     return (
       <div className="notes-page">
-
         <div className="notes-container">
-
           <button
             className="back-button"
             onClick={() =>
-              navigate(
-                `/subject/${subjectId}`
-              )
+              navigate(`/subject/${subjectId}`)
             }
           >
             <ArrowLeft size={18} />
-
             Back to Subject
           </button>
 
           <div className="notes-message">
-
             <FileText size={45} />
 
-            <h3>
-              Unable to load notes
-            </h3>
-
-            <p>
-              {error}
-            </p>
-
+            <h3>Unable to load notes</h3>
+            <p>{error}</p>
           </div>
-
         </div>
-
       </div>
     );
   }
@@ -294,172 +235,126 @@ export default function Notes() {
   // --------------------------------------------------
   // MAIN PAGE
   // --------------------------------------------------
+
   return (
     <div className="notes-page">
-
       <div className="notes-container">
 
-        {/* BACK BUTTON */}
+        {/* Back Button */}
         <button
           className="back-button"
           onClick={() =>
-            navigate(
-              `/subject/${subjectId}`
-            )
+            navigate(`/subject/${subjectId}`)
           }
         >
           <ArrowLeft size={18} />
-
           Back to Subject
         </button>
 
-        {/* HEADER */}
+        {/* Header */}
         <div className="notes-header">
-
           <div className="notes-header-icon">
             <BookOpen size={30} />
           </div>
 
           <div>
-
-            <span>
-              Study Material
-            </span>
+            <span>Study Material</span>
 
             <h1>
               {subject?.name || "Subject"} Notes
             </h1>
 
             <p>
-              Read and download notes
-              for this subject.
+              Read and download notes for this subject.
             </p>
-
           </div>
-
         </div>
 
-        {/* NO NOTES */}
+        {/* No Notes */}
         {resources.length === 0 ? (
-
           <div className="notes-message">
-
             <FileText size={45} />
 
-            <h3>
-              No notes available
-            </h3>
+            <h3>No notes available</h3>
 
             <p>
-              Notes for this subject
-              have not been added yet.
+              Notes for this subject have not been
+              added yet.
             </p>
-
           </div>
-
         ) : (
-
-          /* NOTES GRID */
+          /* Notes Grid */
           <div className="notes-grid">
+            {resources.map((resource, index) => {
+              const fileUrl = getFileUrl(resource);
 
-            {resources.map(
-              (resource, index) => {
-
-                const fileUrl =
-                  getFileUrl(resource);
-
-                return (
-                  <div
-                    className="note-card"
-                    key={
-                      resource._id ||
-                      resource.id ||
-                      index
-                    }
-                  >
-
-                    {/* ICON */}
-                    <div className="note-icon">
-
-                      <FileText
-                        size={28}
-                      />
-
-                    </div>
-
-                    {/* CONTENT */}
-                    <div className="note-content">
-
-                      <h3>
-                        {resource.title ||
-                          `Unit ${index + 1}`}
-                      </h3>
-
-                      <p>
-                        {resource.description ||
-                          `Notes for Unit ${
-                            index + 1
-                          }`}
-                      </p>
-
-                      {resource.fileName && (
-                        <small>
-                          {resource.fileName}
-                        </small>
-                      )}
-
-                    </div>
-
-                    {/* ACTIONS */}
-                    <div className="note-actions">
-
-                      {/* VIEW */}
-                      <button
-                        type="button"
-                        className="view-button"
-                        onClick={() =>
-                          handleView(
-                            resource
-                          )
-                        }
-                        disabled={!fileUrl}
-                      >
-                        <Eye size={17} />
-
-                        View
-                      </button>
-
-                      {/* DOWNLOAD */}
-                      <button
-                        type="button"
-                        className="download-button"
-                        onClick={() =>
-                          handleDownload(
-                            resource
-                          )
-                        }
-                        disabled={!fileUrl}
-                      >
-                        <Download
-                          size={17}
-                        />
-
-                        Download
-                      </button>
-
-                    </div>
-
+              return (
+                <div
+                  className="note-card"
+                  key={
+                    resource._id ||
+                    resource.id ||
+                    index
+                  }
+                >
+                  {/* Icon */}
+                  <div className="note-icon">
+                    <FileText size={28} />
                   </div>
-                );
-              }
-            )}
 
+                  {/* Content */}
+                  <div className="note-content">
+                    <h3>
+                      {resource.title ||
+                        `Unit ${index + 1}`}
+                    </h3>
+
+                    <p>
+                      {resource.description ||
+                        `Notes for Unit ${index + 1}`}
+                    </p>
+
+                    {resource.fileName && (
+                      <small>
+                        {resource.fileName}
+                      </small>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="note-actions">
+                    {/* View */}
+                    <button
+                      type="button"
+                      className="view-button"
+                      onClick={() =>
+                        handleView(resource)
+                      }
+                      disabled={!fileUrl}
+                    >
+                      <Eye size={17} />
+                      View
+                    </button>
+
+                    {/* Download */}
+                    <button
+                      type="button"
+                      className="download-button"
+                      onClick={() =>
+                        handleDownload(resource)
+                      }
+                      disabled={!fileUrl}
+                    >
+                      <Download size={17} />
+                      Download
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
         )}
-
       </div>
-
     </div>
   );
 }
