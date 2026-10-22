@@ -50,48 +50,36 @@ export default function Login() {
         password: form.password,
       });
 
-      console.log("Login response:", response.data);
-
       const { token, user } = response.data;
 
-      if (!token) {
+      if (!token || !user) {
         setError(
-          "Login successful, but token was not received."
+          "Login response is missing your token or user information."
         );
         return;
       }
 
-      if (!user) {
-        setError(
-          "Login successful, but user information was not received."
-        );
-        return;
-      }
-
-      // Store authentication through AuthContext
+      // Save authentication details
       login(token, user);
 
-      // DIRECTLY GO TO DASHBOARD
+      // Navigate to dashboard after successful login
       navigate("/dashboard", {
         replace: true,
       });
-
     } catch (err) {
       console.error("Login error:", err);
 
       if (err.response) {
         setError(
           err.response.data?.message ||
-          "Invalid email or password."
+            "Invalid email or password."
         );
       } else if (err.request) {
         setError(
-          "Server is not running. Please start the backend."
+          "Unable to connect to the server. Please try again."
         );
       } else {
-        setError(
-          "Something went wrong. Please try again."
-        );
+        setError("Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -111,7 +99,7 @@ export default function Login() {
         <h1>Student Login</h1>
 
         {error && (
-          <div className="form-error">
+          <div className="form-error" role="alert">
             {error}
           </div>
         )}
@@ -148,14 +136,19 @@ export default function Login() {
           disabled={loading}
         />
 
+        {/* Forgot Password Link */}
+        <div className="forgot-password">
+          <Link to="/forgot-password">
+            Forgot Password?
+          </Link>
+        </div>
+
         <button
           type="submit"
           className="btn btn-primary full"
           disabled={loading}
         >
-          {loading
-            ? "Logging in..."
-            : "Login"}
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p className="auth-bottom">
@@ -168,4 +161,3 @@ export default function Login() {
     </div>
   );
 }
-
