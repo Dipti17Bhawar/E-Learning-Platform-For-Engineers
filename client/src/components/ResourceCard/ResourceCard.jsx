@@ -17,19 +17,16 @@ export default function ResourceCard({ resource }) {
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [bookmarkError, setBookmarkError] = useState("");
 
-  // --------------------------------------------------
-  // GET PDF URL
-  // --------------------------------------------------
-
+  // GET FILE URL
   const getFileUrl = () => {
     if (!resource) return null;
 
-    // NEW GRIDFS FILE
+    // GridFS file
     if (resource.fileId) {
       return `${api.defaults.baseURL}/resources/file/${resource.fileId}`;
     }
 
-    // FULL URL
+    // Full URL
     if (
       resource.fileUrl &&
       /^https?:\/\//i.test(resource.fileUrl)
@@ -37,17 +34,15 @@ export default function ResourceCard({ resource }) {
       return resource.fileUrl;
     }
 
-    // REMOVE /api FROM API BASE URL
+    // Backend origin without /api
     const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
 
-    // GRIDFS API PATH
-    if (
-      resource.fileUrl?.startsWith("/api/resources/file/")
-    ) {
+    // GridFS API path
+    if (resource.fileUrl?.startsWith("/api/resources/file/")) {
       return `${apiOrigin}${resource.fileUrl}`;
     }
 
-    // OLD LOCAL UPLOADS FALLBACK
+    // Uploaded file fallback
     if (resource.fileUrl?.startsWith("/uploads/")) {
       return `${apiOrigin}${resource.fileUrl}`;
     }
@@ -57,10 +52,7 @@ export default function ResourceCard({ resource }) {
 
   const fileUrl = getFileUrl();
 
-  // --------------------------------------------------
-  // CHECK EXISTING BOOKMARK
-  // --------------------------------------------------
-
+  // CHECK WHETHER RESOURCE IS ALREADY BOOKMARKED
   useEffect(() => {
     let active = true;
 
@@ -71,7 +63,7 @@ export default function ResourceCard({ resource }) {
         const response = await api.get("/bookmarks");
         const bookmarks = response.data.bookmarks || [];
 
-        const alreadySaved = bookmarks.some((item) => {
+        const saved = bookmarks.some((item) => {
           const savedId =
             typeof item === "string" ? item : item?._id;
 
@@ -79,13 +71,10 @@ export default function ResourceCard({ resource }) {
         });
 
         if (active) {
-          setIsBookmarked(alreadySaved);
+          setIsBookmarked(saved);
         }
       } catch (error) {
-        console.error(
-          "Unable to check bookmark status:",
-          error
-        );
+        console.error("Unable to fetch bookmarks:", error);
       }
     };
 
@@ -96,10 +85,7 @@ export default function ResourceCard({ resource }) {
     };
   }, [resource?._id]);
 
-  // --------------------------------------------------
   // ADD OR REMOVE BOOKMARK
-  // --------------------------------------------------
-
   const handleBookmark = async () => {
     if (!resource?._id || bookmarkLoading) return;
 
@@ -115,6 +101,8 @@ export default function ResourceCard({ resource }) {
         setIsBookmarked(true);
       }
     } catch (error) {
+      console.error("Bookmark error:", error);
+
       setBookmarkError(
         error.response?.data?.message ||
           "Unable to update bookmark. Please log in and try again."
@@ -124,10 +112,7 @@ export default function ResourceCard({ resource }) {
     }
   };
 
-  // --------------------------------------------------
-  // ICON
-  // --------------------------------------------------
-
+  // RESOURCE ICON
   const getIcon = () => {
     if (resource?.type === "question-paper") {
       return <FileText size={26} />;
@@ -136,10 +121,7 @@ export default function ResourceCard({ resource }) {
     return <BookOpen size={26} />;
   };
 
-  // --------------------------------------------------
-  // TYPE NAME
-  // --------------------------------------------------
-
+  // RESOURCE TYPE
   const getTypeName = () => {
     if (resource?.type === "question-paper") {
       return "Question Paper";
@@ -152,26 +134,20 @@ export default function ResourceCard({ resource }) {
     return "Notes";
   };
 
-  // --------------------------------------------------
-  // VIEW PDF IN A NEW TAB
-  // --------------------------------------------------
-
+  // VIEW FILE
   const handleView = () => {
     if (!fileUrl) {
-      alert("PDF file is not available.");
+      alert("File is not available.");
       return;
     }
 
     window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
-  // --------------------------------------------------
-  // DOWNLOAD PDF
-  // --------------------------------------------------
-
+  // DOWNLOAD FILE
   const handleDownload = () => {
     if (!fileUrl) {
-      alert("PDF file is not available.");
+      alert("File is not available.");
       return;
     }
 
@@ -179,12 +155,9 @@ export default function ResourceCard({ resource }) {
     const downloadUrl = `${fileUrl}${separator}download=true`;
 
     const link = document.createElement("a");
-
     link.href = downloadUrl;
     link.download =
-      resource.fileName ||
-      `${resource.title || "resource"}.pdf`;
-
+      resource.fileName || `${resource.title || "resource"}.pdf`;
     link.target = "_self";
 
     document.body.appendChild(link);
@@ -192,14 +165,9 @@ export default function ResourceCard({ resource }) {
     link.remove();
   };
 
-  // --------------------------------------------------
-  // UI
-  // --------------------------------------------------
-
   return (
     <div className="resource-card">
       {/* HEADER */}
-
       <div className="resource-card-header">
         <div className="resource-card-icon">
           {getIcon()}
@@ -211,7 +179,6 @@ export default function ResourceCard({ resource }) {
       </div>
 
       {/* CONTENT */}
-
       <div className="resource-card-content">
         <h3>{resource?.title || "Untitled Resource"}</h3>
 
@@ -220,30 +187,21 @@ export default function ResourceCard({ resource }) {
             "Access this learning resource."}
         </p>
 
-        {/* FILE NAME */}
-
         {resource?.fileName && (
           <small>{resource.fileName}</small>
         )}
 
-        {/* YEAR */}
-
         {resource?.year && (
           <small>Year: {resource.year}</small>
         )}
-
-        {/* SEMESTER */}
 
         {resource?.semester && (
           <small>Semester: {resource.semester}</small>
         )}
       </div>
 
-      {/* ACTIONS */}
-
+      {/* ACTION BUTTONS */}
       <div className="resource-card-actions">
-        {/* VIEW */}
-
         <button
           type="button"
           className="resource-view-button"
@@ -253,8 +211,6 @@ export default function ResourceCard({ resource }) {
           <ExternalLink size={17} />
           View
         </button>
-
-        {/* DOWNLOAD */}
 
         <button
           type="button"
@@ -266,8 +222,7 @@ export default function ResourceCard({ resource }) {
           Download
         </button>
 
-        {/* BOOKMARK */}
-
+        {/* BOOKMARK BUTTON */}
         <button
           type="button"
           className={`resource-bookmark-button ${
@@ -286,13 +241,12 @@ export default function ResourceCard({ resource }) {
           {bookmarkLoading
             ? "Saving..."
             : isBookmarked
-            ? "Saved"
-            : "Bookmark"}
+              ? "Saved"
+              : "Bookmark"}
         </button>
       </div>
 
-      {/* ERROR MESSAGE */}
-
+      {/* ERROR */}
       {bookmarkError && (
         <p className="resource-bookmark-error" role="alert">
           {bookmarkError}
