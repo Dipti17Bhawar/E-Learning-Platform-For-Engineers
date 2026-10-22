@@ -18,6 +18,7 @@ import ForgotPassword from "./views/Forgotpassword/ForgotPassword";
 import ResetPassword from "./views/ResetPassword/ResetPassword";
 import About from "./views/About/About";
 import Reviews from "./views/Reviews/Reviews";
+import Bookmarks from "./views/Bookmarks/Bookmarks.jsx";
 import NotFound from "./views/NotFound/NotFound";
 
 // Dashboard and learning pages
@@ -125,6 +126,15 @@ export default function App() {
             element={<Resources />}
           />
         </Route>
+
+        <Route
+          path="/bookmarks"
+          element={
+            <ProtectedRoute>
+              <Bookmarks />
+            </ProtectedRoute>
+          }
+        />
 
         {/* 404 PAGE */}
         <Route

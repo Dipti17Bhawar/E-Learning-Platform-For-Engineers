@@ -1,10 +1,12 @@
+
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
   GraduationCap,
+  Bookmark,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
@@ -34,24 +36,17 @@ export default function Dashboard() {
 
         console.log("Branches response:", response.data);
 
-        // Backend response:
-        // {
-        //   success: true,
-        //   branches: [...]
-        // }
-
         if (Array.isArray(response.data)) {
           setBranches(response.data);
         } else {
           setBranches(response.data.branches || []);
         }
-
       } catch (err) {
         console.error("Error fetching branches:", err);
 
         setError(
           err.response?.data?.message ||
-          "API route not found."
+            "Unable to load branches. Please try again."
         );
       } finally {
         setLoading(false);
@@ -70,11 +65,7 @@ export default function Dashboard() {
       return;
     }
 
-    // Save selected branch in AuthContext
     updateBranch(branch.code);
-
-    // React route
-    // Example: /branch/CE
     navigate(`/branch/${branch.code}`);
   };
 
@@ -85,10 +76,10 @@ export default function Dashboard() {
           HERO SECTION
       ====================================== */}
       <section className="dashboard-hero">
-
         <div className="dashboard-hero-content">
 
-          <div>
+          <div className="dashboard-welcome">
+
             <h1>
               Welcome, {user?.name || "Student"}
             </h1>
@@ -96,6 +87,16 @@ export default function Dashboard() {
             <p>
               Select your engineering branch to continue.
             </p>
+
+            {/* MY BOOKMARKS LINK */}
+            <Link
+              to="/bookmarks"
+              className="bookmarks-link"
+            >
+              <Bookmark size={18} />
+              <span>My Bookmarks</span>
+            </Link>
+
           </div>
 
           <div className="dashboard-icon">
@@ -103,9 +104,7 @@ export default function Dashboard() {
           </div>
 
         </div>
-
       </section>
-
 
       {/* ======================================
           BRANCH SECTION
@@ -126,34 +125,23 @@ export default function Dashboard() {
 
         </div>
 
-
-        {/* ====================================
-            ERROR
-        ==================================== */}
+        {/* ERROR */}
         {error && (
-          <div className="dashboard-error">
+          <div className="dashboard-error" role="alert">
             {error}
           </div>
         )}
 
-
-        {/* ====================================
-            LOADING
-        ==================================== */}
+        {/* LOADING */}
         {loading && (
           <div className="dashboard-message">
             <div className="dashboard-loader"></div>
 
-            <p>
-              Loading branches...
-            </p>
+            <p>Loading branches...</p>
           </div>
         )}
 
-
-        {/* ====================================
-            NO BRANCHES
-        ==================================== */}
+        {/* NO BRANCHES */}
         {!loading &&
           !error &&
           branches.length === 0 && (
@@ -161,22 +149,17 @@ export default function Dashboard() {
 
               <BookOpen size={42} />
 
-              <h3>
-                No branches available
-              </h3>
+              <h3>No branches available</h3>
 
               <p>
-                Branches will appear here once they
-                are added by the administrator.
+                Branches will appear here once they are
+                added by the administrator.
               </p>
 
             </div>
           )}
 
-
-        {/* ====================================
-            BRANCH CARDS
-        ==================================== */}
+        {/* BRANCH CARDS */}
         {!loading &&
           branches.length > 0 && (
 
@@ -189,18 +172,13 @@ export default function Dashboard() {
                   key={branch._id}
                 >
 
-                  {/* Branch icon/code */}
                   <div className="branch-code">
                     {branch.code}
                   </div>
 
-
-                  {/* Branch information */}
                   <div className="branch-card-content">
 
-                    <h3>
-                      {branch.name}
-                    </h3>
+                    <h3>{branch.name}</h3>
 
                     <p>
                       {branch.description ||
@@ -209,17 +187,12 @@ export default function Dashboard() {
 
                   </div>
 
-
-                  {/* View Subjects */}
                   <button
                     type="button"
                     className="view-subjects-button"
-                    onClick={() =>
-                      handleViewSubjects(branch)
-                    }
+                    onClick={() => handleViewSubjects(branch)}
                   >
                     View Subjects
-
                     <ArrowRight size={18} />
                   </button>
 
@@ -231,7 +204,6 @@ export default function Dashboard() {
           )}
 
       </section>
-
     </div>
   );
 }
