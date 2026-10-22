@@ -15,6 +15,7 @@ import Home from "./views/Home/Home";
 import Login from "./views/Login/Login";
 import Register from "./views/Register/Register";
 import ForgotPassword from "./views/Forgotpassword/ForgotPassword";
+import ResetPassword from "./views/ResetPassword/ResetPassword";
 import About from "./views/About/About";
 import Reviews from "./views/Reviews/Reviews";
 import NotFound from "./views/NotFound/NotFound";
@@ -66,6 +67,10 @@ export default function App() {
         <Route
           path="/forgot-password"
           element={<ForgotPassword />}
+        />
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
         />
 
         <Route
