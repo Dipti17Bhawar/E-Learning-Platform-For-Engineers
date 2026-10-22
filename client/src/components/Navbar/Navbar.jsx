@@ -17,14 +17,17 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Get the first letter of the student's name
   const firstLetter = user?.name
     ? user.name.charAt(0).toUpperCase()
     : "";
 
+  // Close the mobile menu
   const closeMenu = () => {
     setMenuOpen(false);
   };
 
+  // Logout and close the mobile menu
   const handleLogout = () => {
     closeMenu();
     logout();
@@ -33,9 +36,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
 
-      {/* ========================================= */}
       {/* LOGO */}
-      {/* ========================================= */}
 
       <Link
         to="/"
@@ -43,76 +44,64 @@ export default function Navbar() {
         onClick={closeMenu}
       >
         <div className="techsutra-logo-icon">
-
           <GraduationCap
             size={25}
             strokeWidth={2.5}
           />
-
         </div>
 
         <span>TechSutra</span>
       </Link>
 
 
-      {/* ========================================= */}
       {/* DESKTOP NAVIGATION */}
-      {/* ========================================= */}
 
       <div className="navbar-center">
-
-        <Link to="/">
+        <Link to="/" onClick={closeMenu}>
           Home
         </Link>
 
-        <Link to="/about">
+        <Link to="/about" onClick={closeMenu}>
           About
         </Link>
 
-        <Link to="/reviews">
+        <Link to="/reviews" onClick={closeMenu}>
           Reviews
         </Link>
-
       </div>
 
 
-      {/* ========================================= */}
       {/* DESKTOP RIGHT */}
-      {/* ========================================= */}
 
       <div className="navbar-right">
 
         {user ? (
           <>
-            {/* USER AVATAR */}
+            {/* STUDENT AVATAR AND NAME */}
 
             <Link
               to="/dashboard"
-              className="user-avatar"
-              title="Dashboard"
+              className="student-profile"
+              title="Go to Dashboard"
+              onClick={closeMenu}
             >
-              {firstLetter || (
-                <User size={20} />
-              )}
+              <div className="user-avatar">
+                {firstLetter || (
+                  <User size={20} />
+                )}
+              </div>
+
+              <span className="student-name">
+                {user.name || "Student"}
+              </span>
             </Link>
-
-
-            {/* DASHBOARD NAME */}
-
-            <Link
-              to="/dashboard"
-              className="dashboard-nav-link"
-            >
-              Dashboard
-            </Link>
-
 
             {/* LOGOUT */}
 
             <button
               type="button"
               className="logout-btn"
-              onClick={logout}
+              onClick={handleLogout}
             >
               Logout
             </button>
@@ -124,16 +113,17 @@ export default function Navbar() {
             <Link
               to="/login"
               className="login-link"
+              onClick={closeMenu}
             >
               Login
             </Link>
-
 
             {/* REGISTER */}
 
             <Link
               to="/register"
               className="register-link"
+              onClick={closeMenu}
             >
               Register
             </Link>
@@ -143,16 +133,12 @@ export default function Navbar() {
       </div>
 
 
-      {/* ========================================= */}
       {/* HAMBURGER BUTTON */}
-      {/* ========================================= */}
 
       <button
         type="button"
         className="hamburger-button"
-        onClick={() =>
-          setMenuOpen(!menuOpen)
-        }
+        onClick={() => setMenuOpen((prev) => !prev)}
         aria-label="Toggle navigation menu"
         aria-expanded={menuOpen}
       >
@@ -164,9 +150,7 @@ export default function Navbar() {
       </button>
 
 
-      {/* ========================================= */}
       {/* MOBILE MENU */}
-      {/* ========================================= */}
 
       {menuOpen && (
         <div className="mobile-menu">
@@ -197,18 +181,23 @@ export default function Navbar() {
 
             {user ? (
               <>
-                {/* MOBILE DASHBOARD */}
+                {/* MOBILE STUDENT PROFILE */}
 
                 <Link
                   to="/dashboard"
                   onClick={closeMenu}
                   className="mobile-dashboard"
                 >
-                  <User size={18} />
+                  <div className="user-avatar">
+                    {firstLetter || (
+                      <User size={18} />
+                    )}
+                  </div>
 
-                  Dashboard
+                  <span>
+                    {user.name || "Student"}
+                  </span>
                 </Link>
-
 
                 {/* MOBILE LOGOUT */}
 
@@ -222,12 +211,16 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {/* MOBILE LOGIN */}
+
                 <Link
                   to="/login"
                   onClick={closeMenu}
                 >
                   Login
                 </Link>
+
+                {/* MOBILE REGISTER */}
 
                 <Link
                   to="/register"
