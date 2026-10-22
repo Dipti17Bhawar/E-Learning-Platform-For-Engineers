@@ -1,26 +1,56 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../../api/axios.js";
 import "./ForgotPassword.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     setMessage("");
     setError("");
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       setError("Please enter your registered email.");
       return;
     }
 
-    // Connect your backend password-reset API here.
-    setMessage(
-      "Password reset functionality needs to be connected to the backend."
-    );
+    try {
+      setLoading(true);
+
+      const response = await api.post(
+        "/users/forgot-password",
+        { email: trimmedEmail }
+      );
+
+      setMessage(
+        response.data?.message ||
+          "If an account exists for this email, password reset instructions will be sent."
+      );
+    } catch (err) {
+      console.error("Forgot password error:", err);
+
+      if (err.response) {
+        setError(
+          err.response.data?.message ||
+            "Unable to process your request. Please try again."
+        );
+      } else {
+        setError(
+          "Unable to connect to the server. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,6 +88,7 @@ export default function ForgotPassword() {
 
         <input
           id="reset-email"
+          name="email"
           type="email"
           value={email}
           onChange={(e) => {
@@ -68,13 +99,15 @@ export default function ForgotPassword() {
           placeholder="you@example.com"
           autoComplete="email"
           required
+          disabled={loading}
         />
 
         <button
           type="submit"
           className="btn btn-primary full"
+          disabled={loading}
         >
-          Reset Password
+          {loading ? "Sending..." : "Reset Password"}
         </button>
 
         <p className="auth-bottom">
