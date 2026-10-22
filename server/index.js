@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import branchRoutes from "./routes/branchRoutes.js";
 import subjectRoutes from "./routes/subject.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
+import bookmarkRoutes from "./routes/bookmarkRoutes.js";
 
 dotenv.config();
 
@@ -89,6 +90,13 @@ app.use(
   resourceRoutes
 );
 
+app.use(
+  "/api/bookmarks", 
+  bookmarkRoutes);
+
+
+
+
 // --------------------------------------------------
 // 404
 // --------------------------------------------------
@@ -100,6 +108,7 @@ app.use((req, res) => {
     path: req.originalUrl,
   });
 });
+
 
 // --------------------------------------------------
 // SERVER

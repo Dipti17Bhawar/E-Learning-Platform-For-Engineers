@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+
+    bookmarks: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Resource",
+  },
+],  
+
     // Password reset fields
     resetPasswordToken: {
       type: String,
