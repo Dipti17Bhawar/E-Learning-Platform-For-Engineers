@@ -6,8 +6,12 @@ import Resource from "../models/Resource.js";
 // GET BOOKMARKS
 export async function getBookmarks(req, res) {
   try {
-    const user = await User.findById(req.user._id)
-      .populate("bookmarks");
+    const user = await User.findById(req.user._id).populate({
+      path: "bookmarks",
+      populate: {
+        path: "subject",
+      },
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -18,10 +22,11 @@ export async function getBookmarks(req, res) {
 
     return res.status(200).json({
       success: true,
-      bookmarks: user.bookmarks,
+      bookmarks: user.bookmarks.filter(Boolean),
     });
   } catch (error) {
     console.error("Get bookmarks error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Unable to fetch bookmarks.",
@@ -41,12 +46,15 @@ export async function addBookmark(req, res) {
       });
     }
 
-    const resource = await Resource.findById(resourceId);
+    const resource = await Resource.findOne({
+      _id: resourceId,
+      isActive: true,
+    });
 
     if (!resource) {
       return res.status(404).json({
         success: false,
-        message: "Resource not found.",
+        message: "Resource not found or unavailable.",
       });
     }
 
@@ -76,6 +84,7 @@ export async function addBookmark(req, res) {
     });
   } catch (error) {
     console.error("Add bookmark error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Unable to bookmark resource.",
@@ -97,7 +106,11 @@ export async function removeBookmark(req, res) {
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { $pull: { bookmarks: new mongoose.Types.ObjectId(resourceId) } },
+      {
+        $pull: {
+          bookmarks: new mongoose.Types.ObjectId(resourceId),
+        },
+      },
       { new: true }
     );
 
@@ -114,6 +127,7 @@ export async function removeBookmark(req, res) {
     });
   } catch (error) {
     console.error("Remove bookmark error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Unable to remove bookmark.",
