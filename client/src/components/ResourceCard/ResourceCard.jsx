@@ -1,23 +1,28 @@
+
+import { useEffect, useState } from "react";
 import {
   BookOpen,
   Download,
   FileText,
   ExternalLink,
+  Bookmark,
+  Check,
 } from "lucide-react";
 
 import api from "../../api/axios";
-
 import "./ResourceCard.css";
 
 export default function ResourceCard({ resource }) {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [bookmarkError, setBookmarkError] = useState("");
+
   // --------------------------------------------------
   // GET PDF URL
   // --------------------------------------------------
 
   const getFileUrl = () => {
-    if (!resource) {
-      return null;
-    }
+    if (!resource) return null;
 
     // NEW GRIDFS FILE
     if (resource.fileId) {
@@ -27,29 +32,23 @@ export default function ResourceCard({ resource }) {
     // FULL URL
     if (
       resource.fileUrl &&
-      (resource.fileUrl.startsWith("http://") ||
-        resource.fileUrl.startsWith("https://"))
+      /^https?:\/\//i.test(resource.fileUrl)
     ) {
       return resource.fileUrl;
     }
 
+    // REMOVE /api FROM API BASE URL
+    const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
+
     // GRIDFS API PATH
     if (
-      resource.fileUrl &&
-      resource.fileUrl.startsWith("/api/resources/file/")
+      resource.fileUrl?.startsWith("/api/resources/file/")
     ) {
-      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
-
       return `${apiOrigin}${resource.fileUrl}`;
     }
 
     // OLD LOCAL UPLOADS FALLBACK
-    if (
-      resource.fileUrl &&
-      resource.fileUrl.startsWith("/uploads/")
-    ) {
-      const apiOrigin = api.defaults.baseURL.replace(/\/api\/?$/, "");
-
+    if (resource.fileUrl?.startsWith("/uploads/")) {
       return `${apiOrigin}${resource.fileUrl}`;
     }
 
@@ -57,6 +56,73 @@ export default function ResourceCard({ resource }) {
   };
 
   const fileUrl = getFileUrl();
+
+  // --------------------------------------------------
+  // CHECK EXISTING BOOKMARK
+  // --------------------------------------------------
+
+  useEffect(() => {
+    let active = true;
+
+    const checkBookmark = async () => {
+      if (!resource?._id) return;
+
+      try {
+        const response = await api.get("/bookmarks");
+        const bookmarks = response.data.bookmarks || [];
+
+        const alreadySaved = bookmarks.some((item) => {
+          const savedId =
+            typeof item === "string" ? item : item?._id;
+
+          return String(savedId) === String(resource._id);
+        });
+
+        if (active) {
+          setIsBookmarked(alreadySaved);
+        }
+      } catch (error) {
+        console.error(
+          "Unable to check bookmark status:",
+          error
+        );
+      }
+    };
+
+    checkBookmark();
+
+    return () => {
+      active = false;
+    };
+  }, [resource?._id]);
+
+  // --------------------------------------------------
+  // ADD OR REMOVE BOOKMARK
+  // --------------------------------------------------
+
+  const handleBookmark = async () => {
+    if (!resource?._id || bookmarkLoading) return;
+
+    try {
+      setBookmarkLoading(true);
+      setBookmarkError("");
+
+      if (isBookmarked) {
+        await api.delete(`/bookmarks/${resource._id}`);
+        setIsBookmarked(false);
+      } else {
+        await api.post(`/bookmarks/${resource._id}`);
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      setBookmarkError(
+        error.response?.data?.message ||
+          "Unable to update bookmark. Please log in and try again."
+      );
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   // --------------------------------------------------
   // ICON
@@ -100,7 +166,7 @@ export default function ResourceCard({ resource }) {
   };
 
   // --------------------------------------------------
-  // DOWNLOAD PDF WITHOUT OPENING A NEW TAB
+  // DOWNLOAD PDF
   // --------------------------------------------------
 
   const handleDownload = () => {
@@ -109,11 +175,9 @@ export default function ResourceCard({ resource }) {
       return;
     }
 
-    // Ask the backend to send the file as an attachment.
     const separator = fileUrl.includes("?") ? "&" : "?";
     const downloadUrl = `${fileUrl}${separator}download=true`;
 
-    // Create a temporary download link.
     const link = document.createElement("a");
 
     link.href = downloadUrl;
@@ -121,7 +185,6 @@ export default function ResourceCard({ resource }) {
       resource.fileName ||
       `${resource.title || "resource"}.pdf`;
 
-    // Do not open another tab.
     link.target = "_self";
 
     document.body.appendChild(link);
@@ -135,7 +198,6 @@ export default function ResourceCard({ resource }) {
 
   return (
     <div className="resource-card">
-
       {/* HEADER */}
 
       <div className="resource-card-header">
@@ -151,9 +213,7 @@ export default function ResourceCard({ resource }) {
       {/* CONTENT */}
 
       <div className="resource-card-content">
-        <h3>
-          {resource?.title || "Untitled Resource"}
-        </h3>
+        <h3>{resource?.title || "Untitled Resource"}</h3>
 
         <p>
           {resource?.description ||
@@ -182,7 +242,6 @@ export default function ResourceCard({ resource }) {
       {/* ACTIONS */}
 
       <div className="resource-card-actions">
-
         {/* VIEW */}
 
         <button
@@ -207,7 +266,38 @@ export default function ResourceCard({ resource }) {
           Download
         </button>
 
+        {/* BOOKMARK */}
+
+        <button
+          type="button"
+          className={`resource-bookmark-button ${
+            isBookmarked ? "is-bookmarked" : ""
+          }`}
+          onClick={handleBookmark}
+          disabled={bookmarkLoading || !resource?._id}
+          aria-pressed={isBookmarked}
+        >
+          {isBookmarked ? (
+            <Check size={17} />
+          ) : (
+            <Bookmark size={17} />
+          )}
+
+          {bookmarkLoading
+            ? "Saving..."
+            : isBookmarked
+            ? "Saved"
+            : "Bookmark"}
+        </button>
       </div>
+
+      {/* ERROR MESSAGE */}
+
+      {bookmarkError && (
+        <p className="resource-bookmark-error" role="alert">
+          {bookmarkError}
+        </p>
+      )}
     </div>
   );
 }
