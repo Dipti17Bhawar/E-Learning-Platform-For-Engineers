@@ -1,23 +1,33 @@
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+
+import {
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
+// Public pages
 import Home from "./views/Home/Home";
 import Login from "./views/Login/Login";
 import Register from "./views/Register/Register";
+import ForgotPassword from "./views/Forgotpassword/ForgotPassword";
+import About from "./views/About/About";
+import Reviews from "./views/Reviews/Reviews";
+import NotFound from "./views/NotFound/NotFound";
+
+// Dashboard and learning pages
 import Dashboard from "./views/Dashboard/Dashboard";
 import BranchSubjects from "./views/BranchSubjects/BranchSubjects";
 import Subject from "./views/Subject/Subject";
 import Resources from "./views/Resources/Resources";
 import Notes from "./views/Notes/Notes";
 import QuestionPapers from "./views/QuestionPapers/QuestionPapers";
-import About from "./views/About/About";
-import Reviews from "./views/Reviews/Reviews";
-import NotFound from "./views/NotFound/NotFound";
 
-
+// Common layout
 function Layout() {
   return (
     <>
@@ -32,15 +42,15 @@ function Layout() {
   );
 }
 
-
 export default function App() {
   return (
     <Routes>
-
       {/* PUBLIC ROUTES */}
       <Route element={<Layout />}>
-
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={<Home />}
+        />
 
         <Route
           path="/login"
@@ -50,6 +60,12 @@ export default function App() {
         <Route
           path="/register"
           element={<Register />}
+        />
+
+        {/* FORGOT PASSWORD */}
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
         />
 
         <Route
@@ -62,10 +78,8 @@ export default function App() {
           element={<Reviews />}
         />
 
-
         {/* PROTECTED ROUTES */}
         <Route element={<ProtectedRoute />}>
-
           <Route
             path="/dashboard"
             element={<Dashboard />}
@@ -105,22 +119,20 @@ export default function App() {
             path="/subject/:subjectId/study-materials"
             element={<Resources />}
           />
-
         </Route>
 
-        {/* 404 */}
+        {/* 404 PAGE */}
         <Route
           path="/404"
           element={<NotFound />}
         />
 
+        {/* UNKNOWN ROUTES */}
         <Route
           path="*"
           element={<Navigate to="/404" replace />}
         />
-
       </Route>
-
     </Routes>
   );
 }

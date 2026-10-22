@@ -52,17 +52,24 @@ export default function Login() {
 
       const { token, user } = response.data;
 
-      if (!token || !user) {
+      if (!token) {
         setError(
-          "Login response is missing your token or user information."
+          "Login successful, but token was not received."
         );
         return;
       }
 
-      // Save authentication details
+      if (!user) {
+        setError(
+          "Login successful, but user information was not received."
+        );
+        return;
+      }
+
+      // Store authentication through AuthContext
       login(token, user);
 
-      // Navigate to dashboard after successful login
+      // Navigate to dashboard
       navigate("/dashboard", {
         replace: true,
       });
@@ -79,7 +86,9 @@ export default function Login() {
           "Unable to connect to the server. Please try again."
         );
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(
+          "Something went wrong. Please try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -136,7 +145,7 @@ export default function Login() {
           disabled={loading}
         />
 
-        {/* Forgot Password Link */}
+        {/* Navigate to ForgotPassword page */}
         <div className="forgot-password">
           <Link to="/forgot-password">
             Forgot Password?
