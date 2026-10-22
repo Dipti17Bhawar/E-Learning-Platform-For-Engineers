@@ -38,14 +38,14 @@ The application provides a structured way to manage educational resources, inclu
 
 <!-- Add your Home page screenshot here -->
 <p align="center">
-  <img src="screenshots/home.png" alt="E-Learning Platform Home Page" width="90%" />
+  <img src="client/src/assets/homepage.png" alt="E-Learning Platform Home Page" width="90%" />
 </p>
 
 ### 📊 Dashboard
 
 <!-- Add your Dashboard screenshot here -->
 <p align="center">
-  <img src="screenshots/dashboard.png" alt="E-Learning Platform Dashboard" width="90%" />
+  <img src="client/src/assets/dashboard.png" alt="E-Learning Platform Dashboard" width="90%" />
 </p>
 
 > **Note:** Add your actual screenshots to the `screenshots` folder and use the corresponding filenames above.
