@@ -48,7 +48,7 @@ The application provides a structured way to manage educational resources, inclu
   <img src="client/src/assets/dashboard.png" alt="E-Learning Platform Dashboard" width="90%" />
 </p>
 
-> **Note:** Add your actual screenshots to the `screenshots` folder and use the corresponding filenames above.
+
 
 ## 🛠️ Technology Stack
 
@@ -67,7 +67,7 @@ The application provides a structured way to manage educational resources, inclu
 
 ## 📁 Project Structure
 
-```text
+
 E-Learning-Platform-For-Engineers/
 │
 ├── client/                         # React frontend

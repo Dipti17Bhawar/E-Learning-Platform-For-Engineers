@@ -19,18 +19,12 @@ export default function ResourceCard({ resource }) {
       return null;
     }
 
-    // ------------------------------------------------
     // NEW GRIDFS FILE
-    // ------------------------------------------------
-
     if (resource.fileId) {
       return `${api.defaults.baseURL}/resources/file/${resource.fileId}`;
     }
 
-    // ------------------------------------------------
     // FULL URL
-    // ------------------------------------------------
-
     if (
       resource.fileUrl &&
       (resource.fileUrl.startsWith("http://") ||
@@ -39,13 +33,7 @@ export default function ResourceCard({ resource }) {
       return resource.fileUrl;
     }
 
-    // ------------------------------------------------
     // GRIDFS API PATH
-    //
-    // Example:
-    // /api/resources/file/6ab7816df24910f54d574f8a
-    // ------------------------------------------------
-
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/api/resources/file/")
@@ -55,13 +43,7 @@ export default function ResourceCard({ resource }) {
       return `${apiOrigin}${resource.fileUrl}`;
     }
 
-    // ------------------------------------------------
     // OLD LOCAL UPLOADS FALLBACK
-    //
-    // Example:
-    // /uploads/example.pdf
-    // ------------------------------------------------
-
     if (
       resource.fileUrl &&
       resource.fileUrl.startsWith("/uploads/")
@@ -97,11 +79,15 @@ export default function ResourceCard({ resource }) {
       return "Question Paper";
     }
 
+    if (resource?.type === "study-material") {
+      return "Study Material";
+    }
+
     return "Notes";
   };
 
   // --------------------------------------------------
-  // VIEW PDF
+  // VIEW PDF IN A NEW TAB
   // --------------------------------------------------
 
   const handleView = () => {
@@ -110,17 +96,11 @@ export default function ResourceCard({ resource }) {
       return;
     }
 
-    console.log("Opening PDF:", fileUrl);
-
-    window.open(
-      fileUrl,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
   // --------------------------------------------------
-  // DOWNLOAD PDF DIRECTLY
+  // DOWNLOAD PDF WITHOUT OPENING A NEW TAB
   // --------------------------------------------------
 
   const handleDownload = () => {
@@ -129,43 +109,24 @@ export default function ResourceCard({ resource }) {
       return;
     }
 
-    /*
-      Add download=true to the GridFS URL.
+    // Ask the backend to send the file as an attachment.
+    const separator = fileUrl.includes("?") ? "&" : "?";
+    const downloadUrl = `${fileUrl}${separator}download=true`;
 
-      Example:
-
-      /api/resources/file/12345
-
-      becomes:
-
-      /api/resources/file/12345?download=true
-
-      The backend will then send:
-      Content-Disposition: attachment
-    */
-
-    const separator = fileUrl.includes("?")
-      ? "&"
-      : "?";
-
-    const downloadUrl =
-      `${fileUrl}${separator}download=true`;
-
-    console.log("Downloading PDF:", downloadUrl);
-
+    // Create a temporary download link.
     const link = document.createElement("a");
 
     link.href = downloadUrl;
-
     link.download =
       resource.fileName ||
       `${resource.title || "resource"}.pdf`;
 
+    // Do not open another tab.
+    link.target = "_self";
+
     document.body.appendChild(link);
-
     link.click();
-
-    document.body.removeChild(link);
+    link.remove();
   };
 
   // --------------------------------------------------
@@ -175,12 +136,9 @@ export default function ResourceCard({ resource }) {
   return (
     <div className="resource-card">
 
-      {/* -------------------------------------------- */}
       {/* HEADER */}
-      {/* -------------------------------------------- */}
 
       <div className="resource-card-header">
-
         <div className="resource-card-icon">
           {getIcon()}
         </div>
@@ -188,15 +146,11 @@ export default function ResourceCard({ resource }) {
         <span className="resource-card-type">
           {getTypeName()}
         </span>
-
       </div>
 
-      {/* -------------------------------------------- */}
       {/* CONTENT */}
-      {/* -------------------------------------------- */}
 
       <div className="resource-card-content">
-
         <h3>
           {resource?.title || "Untitled Resource"}
         </h3>
@@ -206,35 +160,26 @@ export default function ResourceCard({ resource }) {
             "Access this learning resource."}
         </p>
 
-        {/* File name */}
+        {/* FILE NAME */}
 
         {resource?.fileName && (
-          <small>
-            {resource.fileName}
-          </small>
+          <small>{resource.fileName}</small>
         )}
 
-        {/* Year */}
+        {/* YEAR */}
 
         {resource?.year && (
-          <small>
-            Year: {resource.year}
-          </small>
+          <small>Year: {resource.year}</small>
         )}
 
-        {/* Semester */}
+        {/* SEMESTER */}
 
         {resource?.semester && (
-          <small>
-            Semester: {resource.semester}
-          </small>
+          <small>Semester: {resource.semester}</small>
         )}
-
       </div>
 
-      {/* -------------------------------------------- */}
       {/* ACTIONS */}
-      {/* -------------------------------------------- */}
 
       <div className="resource-card-actions">
 
@@ -247,7 +192,6 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <ExternalLink size={17} />
-
           View
         </button>
 
@@ -260,12 +204,10 @@ export default function ResourceCard({ resource }) {
           disabled={!fileUrl}
         >
           <Download size={17} />
-
           Download
         </button>
 
       </div>
-
     </div>
   );
 }
