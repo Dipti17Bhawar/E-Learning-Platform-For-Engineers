@@ -61,32 +61,7 @@ export default function Footer() {
         </div>
 
 
-        {/* ========================================= */}
-        {/* LEARNING */}
-        {/* ========================================= */}
-
-        <div className="footer-section">
-
-          <h4>Learning</h4>
-
-          <Link to="/dashboard">
-            Branches
-          </Link>
-
-          <Link to="/dashboard">
-            Subjects
-          </Link>
-
-          <Link to="/dashboard">
-            Notes
-          </Link>
-
-          <Link to="/dashboard">
-            Question Papers
-          </Link>
-
-        </div>
-
+       
 
         {/* ========================================= */}
         {/* CONTACT */}
