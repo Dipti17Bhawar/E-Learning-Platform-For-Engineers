@@ -14,14 +14,12 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Home from "./views/Home/Home";
 import Login from "./views/Login/Login";
 import Register from "./views/Register/Register";
-import ForgotPassword from "./views/Forgotpassword/ForgotPassword";
-import ResetPassword from "./views/ResetPassword/ResetPassword";
 import About from "./views/About/About";
 import Reviews from "./views/Reviews/Reviews";
-import Bookmarks from "./views/Bookmarks/Bookmarks.jsx";
 import NotFound from "./views/NotFound/NotFound";
 
-// Dashboard and learning pages
+// Protected pages
+import Bookmarks from "./views/Bookmarks/Bookmarks.jsx";
 import Dashboard from "./views/Dashboard/Dashboard";
 import BranchSubjects from "./views/BranchSubjects/BranchSubjects";
 import Subject from "./views/Subject/Subject";
@@ -47,42 +45,13 @@ function Layout() {
 export default function App() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
       <Route element={<Layout />}>
-        <Route
-          path="/"
-          element={<Home />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        {/* FORGOT PASSWORD */}
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
-        />
-
-        <Route
-          path="/about"
-          element={<About />}
-        />
-
-        <Route
-          path="/reviews"
-          element={<Reviews />}
-        />
+        {/* PUBLIC ROUTES */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/reviews" element={<Reviews />} />
 
         {/* PROTECTED ROUTES */}
         <Route element={<ProtectedRoute />}>
@@ -96,45 +65,36 @@ export default function App() {
             element={<BranchSubjects />}
           />
 
-          {/* SUBJECT */}
           <Route
             path="/subject/:subjectId"
             element={<Subject />}
           />
 
-          {/* ALL RESOURCES */}
           <Route
             path="/subject/:subjectId/resources"
             element={<Resources />}
           />
 
-          {/* NOTES */}
           <Route
             path="/subject/:subjectId/notes"
             element={<Notes />}
           />
 
-          {/* QUESTION PAPERS */}
           <Route
             path="/subject/:subjectId/question-papers"
             element={<QuestionPapers />}
           />
 
-          {/* STUDY MATERIALS */}
           <Route
             path="/subject/:subjectId/study-materials"
             element={<Resources />}
           />
-        </Route>
 
-        <Route
-          path="/bookmarks"
-          element={
-            <ProtectedRoute>
-              <Bookmarks />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/bookmarks"
+            element={<Bookmarks />}
+          />
+        </Route>
 
         {/* 404 PAGE */}
         <Route

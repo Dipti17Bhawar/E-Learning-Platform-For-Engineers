@@ -35,24 +35,12 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-
     bookmarks: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Resource",
-  },
-],  
-
-    // Password reset fields
-    resetPasswordToken: {
-      type: String,
-      default: undefined,
-    },
-
-    resetPasswordExpires: {
-      type: Date,
-      default: undefined,
-    },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Resource",
+      },
+    ],
   },
   {
     timestamps: true,
