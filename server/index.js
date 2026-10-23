@@ -10,6 +10,7 @@ import branchRoutes from "./routes/branchRoutes.js";
 import subjectRoutes from "./routes/subject.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import bookmarkRoutes from "./routes/bookmarkRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config();
 
@@ -92,7 +93,12 @@ app.use(
 
 app.use(
   "/api/bookmarks", 
-  bookmarkRoutes);
+  bookmarkRoutes
+);
+app.use(
+  "/api/reviews", 
+  reviewRoutes
+);
 
 
 
