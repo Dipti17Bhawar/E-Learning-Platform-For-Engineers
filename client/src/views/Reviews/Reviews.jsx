@@ -5,7 +5,7 @@ import {
   MessageSquarePlus,
 } from "lucide-react";
 
-import api from "../api/axios.js";
+import api from "../../api/axios.js";
 import "./Reviews.css";
 
 export default function Reviews() {
