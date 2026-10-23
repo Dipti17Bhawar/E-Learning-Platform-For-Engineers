@@ -52,21 +52,14 @@ export default function Login() {
 
       const { token, user } = response.data;
 
-      if (!token) {
+      if (!token || !user) {
         setError(
-          "Login successful, but token was not received."
+          "Login response is incomplete. Please try again."
         );
         return;
       }
 
-      if (!user) {
-        setError(
-          "Login successful, but user information was not received."
-        );
-        return;
-      }
-
-      // Store authentication through AuthContext
+      // Save authentication through AuthContext
       login(token, user);
 
       // Navigate to dashboard
@@ -86,9 +79,7 @@ export default function Login() {
           "Unable to connect to the server. Please try again."
         );
       } else {
-        setError(
-          "Something went wrong. Please try again."
-        );
+        setError("Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -113,9 +104,7 @@ export default function Login() {
           </div>
         )}
 
-        <label htmlFor="email">
-          Email
-        </label>
+        <label htmlFor="email">Email</label>
 
         <input
           id="email"
@@ -129,9 +118,7 @@ export default function Login() {
           disabled={loading}
         />
 
-        <label htmlFor="password">
-          Password
-        </label>
+        <label htmlFor="password">Password</label>
 
         <input
           id="password"
@@ -144,13 +131,6 @@ export default function Login() {
           required
           disabled={loading}
         />
-
-        {/* Navigate to ForgotPassword page */}
-        <div className="forgot-password">
-          <Link to="/forgot-password">
-            Forgot Password?
-          </Link>
-        </div>
 
         <button
           type="submit"
