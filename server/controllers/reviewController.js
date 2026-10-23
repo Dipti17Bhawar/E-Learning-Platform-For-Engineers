@@ -4,8 +4,9 @@ import Review from "../models/Review.js";
 // GET: Fetch all reviews
 export const getReviews = async (req, res) => {
   try {
-    const reviews = await Review.find()
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find().sort({
+      createdAt: -1,
+    });
 
     return res.status(200).json({
       success: true,
@@ -21,7 +22,7 @@ export const getReviews = async (req, res) => {
   }
 };
 
-// POST: Add a new review
+// POST: Create a review
 export const createReview = async (req, res) => {
   try {
     const { name, reviewText, rating } = req.body;
@@ -49,8 +50,10 @@ export const createReview = async (req, res) => {
       });
     }
 
-    if (name.trim().length > 50 ||
-        reviewText.trim().length > 1000) {
+    if (
+      name.trim().length > 50 ||
+      reviewText.trim().length > 1000
+    ) {
       return res.status(400).json({
         success: false,
         message: "Name or review exceeds the allowed length.",
@@ -58,6 +61,7 @@ export const createReview = async (req, res) => {
     }
 
     const review = await Review.create({
+      user: req.user._id,
       name: name.trim(),
       reviewText: reviewText.trim(),
       rating,
