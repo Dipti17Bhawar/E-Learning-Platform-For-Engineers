@@ -2,18 +2,18 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import User from "../models/User.js";
 
 // CREATE JWT TOKEN
 function createToken(id) {
-  return jwt.sign(
-    { id },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "7d",
-    }
-  );
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is missing from server configuration.");
+  }
+
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 }
 
 // RETURN PUBLIC USER INFORMATION
@@ -27,37 +27,19 @@ function publicUser(user) {
   };
 }
 
-// EMAIL TRANSPORTER
-function createMailTransporter() {
-  const {
-    SMTP_HOST,
-    SMTP_PORT,
-    SMTP_SECURE,
-    SMTP_USER,
-    SMTP_PASS,
-  } = process.env;
-
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("Email SMTP configuration is missing.");
-  }
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT || 587),
-    secure: SMTP_SECURE === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-  });
-}
-
 // REGISTER
 export async function register(req, res) {
   try {
     const { name, email, password, branch } = req.body;
 
-    if (!name || !email || !password) {
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !name.trim() ||
+      !email.trim() ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message: "Name, email and password are required.",
@@ -124,7 +106,12 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required.",
@@ -208,8 +195,13 @@ export async function getMe(req, res) {
 
 // FORGOT PASSWORD
 export async function forgotPassword(req, res) {
+  let user;
+
   try {
-    const email = req.body.email?.trim().toLowerCase();
+    const email =
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
 
     if (!email) {
       return res.status(400).json({
@@ -218,11 +210,11 @@ export async function forgotPassword(req, res) {
       });
     }
 
-    // Use a generic response to avoid revealing registered accounts.
+    // Avoid revealing whether an account exists.
     const successMessage =
       "If an account exists for this email, password reset instructions will be sent.";
 
-    const user = await User.findOne({ email });
+    user = await User.findOne({ email });
 
     if (!user) {
       return res.status(200).json({
@@ -231,9 +223,20 @@ export async function forgotPassword(req, res) {
       });
     }
 
-    // Generate a cryptographically secure, single-use token.
+    const clientUrl = process.env.CLIENT_URL;
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const mailFrom = process.env.MAIL_FROM;
+
+    if (!clientUrl || !resendApiKey || !mailFrom) {
+      throw new Error(
+        "CLIENT_URL, RESEND_API_KEY, or MAIL_FROM is missing."
+      );
+    }
+
+    // Generate a secure, single-use reset token.
     const resetToken = crypto.randomBytes(32).toString("hex");
 
+    // Store only the hash of the token in the database.
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
@@ -246,25 +249,16 @@ export async function forgotPassword(req, res) {
 
     await user.save();
 
-    const clientUrl = process.env.CLIENT_URL;
-
-    if (!clientUrl) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      await user.save();
-
-      throw new Error("CLIENT_URL is missing from server configuration.");
-    }
-
     const resetUrl =
-      `${clientUrl.replace(/\/$/, "")}/reset-password?token=${resetToken}`;
+      `${clientUrl.replace(/\/+$/, "")}/reset-password?token=${encodeURIComponent(resetToken)}`;
 
-    try {
-      const transporter = createMailTransporter();
+    // Send the email using Resend's HTTPS API.
+    const resend = new Resend(resendApiKey);
 
-      await transporter.sendMail({
-        from: process.env.MAIL_FROM || process.env.SMTP_USER,
-        to: user.email,
+    const { data, error: emailError } =
+      await resend.emails.send({
+        from: mailFrom,
+        to: [user.email],
         subject: "Reset your E-Learning Platform password",
         text: [
           `Hello ${user.name},`,
@@ -277,29 +271,37 @@ export async function forgotPassword(req, res) {
           "If you did not request this, you can ignore this email.",
         ].join("\n"),
       });
-    } catch (mailError) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      await user.save();
 
-      console.error("Password reset email error:", mailError);
-
-      return res.status(500).json({
-        success: false,
-        message: "Unable to send the reset email. Please try again later.",
-      });
+    if (emailError) {
+      throw new Error(emailError.message);
     }
+
+    console.log("Password reset email accepted:", data?.id);
 
     return res.status(200).json({
       success: true,
       message: successMessage,
     });
   } catch (error) {
-    console.error("Forgot password error:", error);
+    console.error("Forgot password error:", error.message);
+
+    // Clear the token if sending fails so the user can safely retry.
+    if (user) {
+      try {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+      } catch (saveError) {
+        console.error(
+          "Unable to clear reset token:",
+          saveError.message
+        );
+      }
+    }
 
     return res.status(500).json({
       success: false,
-      message: "Unable to process your request. Please try again.",
+      message: "Unable to send the reset email. Please try again later.",
     });
   }
 }
@@ -341,13 +343,14 @@ export async function resetPassword(req, res) {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "The reset link is invalid or has expired. Please request a new one.",
+        message:
+          "The reset link is invalid or has expired. Please request a new one.",
       });
     }
 
     user.password = await bcrypt.hash(password, 10);
 
-    // Remove the token so it cannot be reused.
+    // Invalidate the token after a successful password reset.
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
@@ -355,7 +358,8 @@ export async function resetPassword(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: "Password reset successful. Please log in with your new password.",
+      message:
+        "Password reset successful. Please log in with your new password.",
     });
   } catch (error) {
     console.error("Reset password error:", error);
