@@ -1,19 +1,9 @@
 import { useEffect, useState } from "react";
-
-import {
-  ArrowLeft,
-  FileText,
-} from "lucide-react";
-
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { ArrowLeft, FileText } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../../api/axios";
-
 import ResourceCard from "../../components/ResourceCard/ResourceCard";
-
 import "./QuestionPapers.css";
 
 export default function QuestionPapers() {
@@ -26,6 +16,8 @@ export default function QuestionPapers() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     const fetchQuestionPapers = async () => {
       try {
         setLoading(true);
@@ -36,211 +28,113 @@ export default function QuestionPapers() {
           return;
         }
 
-        console.log(
-          "Question Papers Subject ID:",
-          subjectId
-        );
+        const [subjectResponse, resourceResponse] =
+          await Promise.all([
+            api.get(`/subjects/${subjectId}`),
+            api.get(`/resources/subject/${subjectId}`),
+          ]);
 
-        const [
-          subjectResponse,
-          resourceResponse,
-        ] = await Promise.all([
-          api.get(`/subjects/${subjectId}`),
-
-          api.get(
-            `/resources/subject/${subjectId}`
-          ),
-        ]);
-
-        // --------------------------------------------
-        // SUBJECT
-        // --------------------------------------------
         const subjectData =
-          subjectResponse.data?.subject ||
-          subjectResponse.data;
+          subjectResponse.data?.subject || subjectResponse.data;
 
-        setSubject(subjectData);
+        const responseData = resourceResponse.data;
 
-        // --------------------------------------------
-        // ALL RESOURCES
-        // --------------------------------------------
-        const allResources =
-          Array.isArray(resourceResponse.data)
-            ? resourceResponse.data
-            : resourceResponse.data?.resources ||
-              [];
+        const allResources = Array.isArray(responseData)
+          ? responseData
+          : responseData?.resources || [];
 
-        console.log(
-          "All resources:",
-          allResources
+        const questionPapers = allResources.filter(
+          (resource) => resource.type === "question-paper"
         );
 
-        // --------------------------------------------
-        // ONLY QUESTION PAPERS
-        // --------------------------------------------
-        const questionPapers =
-          allResources.filter(
-            (resource) =>
-              resource.type === "question-paper"
+        if (active) {
+          setSubject(subjectData);
+          setResources(questionPapers);
+        }
+      } catch (err) {
+        console.error("Error fetching question papers:", err);
+
+        if (active) {
+          setError(
+            err.response?.data?.message ||
+              "Unable to load question papers."
           );
-
-        console.log(
-          "Question papers:",
-          questionPapers
-        );
-
-        setResources(questionPapers);
-
-      } catch (error) {
-        console.error(
-          "Error fetching question papers:",
-          error
-        );
-
-        console.error(
-          "Status:",
-          error.response?.status
-        );
-
-        console.error(
-          "Response:",
-          error.response?.data
-        );
-
-        setError(
-          error.response?.data?.message ||
-            "Unable to load question papers."
-        );
-
-        setResources([]);
-
+          setResources([]);
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchQuestionPapers();
+
+    return () => {
+      active = false;
+    };
   }, [subjectId]);
+
+  const goBack = () => {
+    navigate(`/subject/${subjectId}`);
+  };
 
   return (
     <div className="qps-page">
-
       <div className="qps-container">
-
-        {/* BACK TO SUBJECT */}
         <button
           type="button"
           className="back-button"
-          onClick={() =>
-            navigate(`/subject/${subjectId}`)
-          }
+          onClick={goBack}
         >
           <ArrowLeft size={18} />
-
           Back to Subject
         </button>
 
-        {/* HEADER */}
         <div className="qps-header">
-
           <div className="qps-header-icon">
             <FileText size={30} />
           </div>
 
           <div>
-
-            <span>
-              Practice Material
-            </span>
-
+            <span>Practice Material</span>
             <h1>
-              {subject?.name || "Subject"}{" "}
-              Question Papers
+              {subject?.name || "Subject"} Question Papers
             </h1>
-
             <p>
-              Practice previous year and important
-              question papers.
+              Practice previous year and important question papers.
             </p>
-
           </div>
-
         </div>
 
-        {/* ERROR */}
         {error ? (
-
           <div className="qps-message">
-
             <FileText size={45} />
-
-            <h3>
-              Unable to load question papers
-            </h3>
-
-            <p>
-              {error}
-            </p>
-
+            <h3>Unable to load question papers</h3>
+            <p>{error}</p>
           </div>
-
         ) : loading ? (
-
-          /* LOADING */
           <div className="qps-message">
-
-            <div className="loader"></div>
-
-            <p>
-              Loading question papers...
-            </p>
-
+            <div className="loader" />
+            <p>Loading question papers...</p>
           </div>
-
         ) : resources.length === 0 ? (
-
-          /* NO QUESTION PAPERS */
           <div className="qps-message">
-
             <FileText size={45} />
-
-            <h3>
-              No question papers available
-            </h3>
-
-            <p>
-              Question papers have not been
-              added yet.
-            </p>
-
+            <h3>No question papers available</h3>
+            <p>Question papers have not been added yet.</p>
           </div>
-
         ) : (
-
-          /* QUESTION PAPERS GRID */
           <div className="qps-grid">
-
-            {resources.map(
-              (resource, index) => (
-
-                <ResourceCard
-                  key={
-                    resource._id ||
-                    resource.id ||
-                    index
-                  }
-                  resource={resource}
-                />
-
-              )
-            )}
-
+            {resources.map((resource, index) => (
+              <ResourceCard
+                key={resource._id || resource.id || index}
+                resource={resource}
+              />
+            ))}
           </div>
-
         )}
-
       </div>
-
     </div>
   );
 }

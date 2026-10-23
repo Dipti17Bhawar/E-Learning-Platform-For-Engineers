@@ -1,7 +1,4 @@
-
-/* ========================================
-   RESOURCE CARD
-======================================== */
+/* RESOURCE CARD */
 
 .resource-card {
   display: flex;
@@ -10,15 +7,13 @@
   min-width: 0;
   height: 100%;
   padding: 22px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
   box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .resource-card:hover {
@@ -27,9 +22,7 @@
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
 }
 
-/* ========================================
-   RESOURCE HEADER
-======================================== */
+/* HEADER */
 
 .resource-card-header {
   display: flex;
@@ -64,9 +57,7 @@
   text-align: center;
 }
 
-/* ========================================
-   RESOURCE CONTENT
-======================================== */
+/* CONTENT */
 
 .resource-card-content {
   display: flex;
@@ -105,9 +96,7 @@
   overflow-wrap: anywhere;
 }
 
-/* ========================================
-   RESOURCE ACTIONS
-======================================== */
+/* ACTIONS */
 
 .resource-card-actions {
   display: flex;
@@ -132,20 +121,13 @@
   font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.2s ease;
 }
 
 .resource-card-actions button svg {
   flex-shrink: 0;
 }
-
-/* ========================================
-   VIEW BUTTON
-======================================== */
 
 .resource-view-button {
   flex: 1 1 75px;
@@ -159,13 +141,9 @@
   border-color: #bfdbfe !important;
 }
 
-/* ========================================
-   DOWNLOAD BUTTON
-======================================== */
-
 .resource-download-button {
   flex: 1 1 95px;
-  color: #ffffff;
+  color: #fff;
   background: #2563eb;
   border-color: #2563eb !important;
 }
@@ -175,14 +153,12 @@
   border-color: #1d4ed8 !important;
 }
 
-/* ========================================
-   BOOKMARK BUTTON
-======================================== */
+/* BOOKMARK */
 
 .resource-card-actions .resource-bookmark-button {
   flex: 1 1 105px;
   color: #4b5563;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #d1d5db !important;
 }
 
@@ -192,22 +168,20 @@
   border-color: #93c5fd !important;
 }
 
-/* SAVED STATE */
-
 .resource-card-actions .resource-bookmark-button.is-bookmarked {
-  color: #ffffff;
+  color: #fff;
   background: #15803d;
   border-color: #15803d !important;
 }
 
 .resource-card-actions
   .resource-bookmark-button.is-bookmarked:hover:not(:disabled) {
-  color: #ffffff;
+  color: #fff;
   background: #166534;
   border-color: #166534 !important;
 }
 
-/* LOADING / DISABLED STATE */
+/* DISABLED AND ACCESSIBILITY */
 
 .resource-card-actions button:disabled {
   opacity: 0.55;
@@ -215,16 +189,12 @@
   transform: none;
 }
 
-/* KEYBOARD ACCESSIBILITY */
-
 .resource-card-actions button:focus-visible {
   outline: 3px solid #93c5fd;
   outline-offset: 3px;
 }
 
-/* ========================================
-   BOOKMARK ERROR
-======================================== */
+/* ERROR */
 
 .resource-bookmark-error {
   margin: 12px 0 0;
@@ -238,9 +208,7 @@
   overflow-wrap: anywhere;
 }
 
-/* ========================================
-   TABLET
-======================================== */
+/* TABLET */
 
 @media (max-width: 768px) {
   .resource-card {
@@ -251,19 +219,13 @@
     font-size: 17px;
   }
 
-  .resource-card-actions {
-    gap: 8px;
-  }
-
   .resource-card-actions button {
     padding: 10px;
     font-size: 12px;
   }
 }
 
-/* ========================================
-   MOBILE
-======================================== */
+/* MOBILE */
 
 @media (max-width: 480px) {
   .resource-card {

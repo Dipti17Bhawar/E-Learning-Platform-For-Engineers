@@ -1,28 +1,36 @@
 
 import mongoose from "mongoose";
-import User from "../models/User.js";
+import Bookmark from "../models/Bookmark.js";
 import Resource from "../models/Resource.js";
 
-// GET BOOKMARKS
-export async function getBookmarks(req, res) {
+// GET /api/bookmarks
+// Return the logged-in user's saved resources.
+export const getBookmarks = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate({
-      path: "bookmarks",
-      populate: {
-        path: "subject",
-      },
-    });
+    const userId = req.user?._id;
 
-    if (!user) {
-      return res.status(404).json({
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        message: "User not found.",
+        message: "Please log in to view bookmarks.",
       });
     }
 
+    const savedBookmarks = await Bookmark.find({
+      user: userId,
+    })
+      .populate("resource")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Return resource objects directly for the frontend.
+    const bookmarks = savedBookmarks
+      .map((item) => item.resource)
+      .filter(Boolean);
+
     return res.status(200).json({
       success: true,
-      bookmarks: user.bookmarks.filter(Boolean),
+      bookmarks,
     });
   } catch (error) {
     console.error("Get bookmarks error:", error);
@@ -32,92 +40,110 @@ export async function getBookmarks(req, res) {
       message: "Unable to fetch bookmarks.",
     });
   }
-}
+};
 
-// ADD BOOKMARK
-export async function addBookmark(req, res) {
+// POST /api/bookmarks/:resourceId
+// Save a resource for the logged-in user.
+export const addBookmark = async (req, res) => {
   try {
+    const userId = req.user?._id;
     const { resourceId } = req.params;
 
-    if (!mongoose.isValidObjectId(resourceId)) {
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please log in to bookmark resources.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(resourceId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid resource ID.",
       });
     }
 
-    const resource = await Resource.findOne({
-      _id: resourceId,
-      isActive: true,
-    });
+    const resource = await Resource.findById(resourceId);
 
     if (!resource) {
       return res.status(404).json({
         success: false,
-        message: "Resource not found or unavailable.",
+        message: "Resource not found.",
       });
     }
 
-    const user = await User.findById(req.user._id);
+    // Return success if it is already bookmarked.
+    const existingBookmark = await Bookmark.findOne({
+      user: userId,
+      resource: resourceId,
+    });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
+    if (existingBookmark) {
+      return res.status(200).json({
+        success: true,
+        message: "Resource is already bookmarked.",
+        bookmark: resource,
       });
     }
 
-    const exists = user.bookmarks.some(
-      (id) => id.toString() === resourceId
-    );
+    await Bookmark.create({
+      user: userId,
+      resource: resourceId,
+    });
 
-    if (!exists) {
-      user.bookmarks.push(resource._id);
-      await user.save();
-    }
-
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: exists
-        ? "Resource is already bookmarked."
-        : "Resource bookmarked successfully.",
+      message: "Resource bookmarked successfully.",
+      bookmark: resource,
     });
   } catch (error) {
+    // Handle a duplicate-key race condition.
+    if (error.code === 11000) {
+      return res.status(200).json({
+        success: true,
+        message: "Resource is already bookmarked.",
+      });
+    }
+
     console.error("Add bookmark error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Unable to bookmark resource.",
+      message: "Unable to bookmark this resource.",
     });
   }
-}
+};
 
-// REMOVE BOOKMARK
-export async function removeBookmark(req, res) {
+// DELETE /api/bookmarks/:resourceId
+// Remove a resource from the logged-in user's bookmarks.
+export const removeBookmark = async (req, res) => {
   try {
+    const userId = req.user?._id;
     const { resourceId } = req.params;
 
-    if (!mongoose.isValidObjectId(resourceId)) {
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please log in to manage bookmarks.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(resourceId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid resource ID.",
       });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        $pull: {
-          bookmarks: new mongoose.Types.ObjectId(resourceId),
-        },
-      },
-      { new: true }
-    );
+    const deletedBookmark = await Bookmark.findOneAndDelete({
+      user: userId,
+      resource: resourceId,
+    });
 
-    if (!user) {
+    if (!deletedBookmark) {
       return res.status(404).json({
         success: false,
-        message: "User not found.",
+        message: "Bookmark not found.",
       });
     }
 
@@ -133,4 +159,4 @@ export async function removeBookmark(req, res) {
       message: "Unable to remove bookmark.",
     });
   }
-}
+};
