@@ -1,5 +1,8 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+
 import api from "../../api/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./Register.css";
@@ -15,6 +18,7 @@ export default function Register() {
     branch: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -57,20 +61,11 @@ export default function Register() {
         password: form.password,
       });
 
-      console.log("Registration response:", response.data);
-
       const { token, user } = response.data;
 
-      if (!token) {
+      if (!token || !user) {
         setError(
-          "Registration completed, but token was not received."
-        );
-        return;
-      }
-
-      if (!user) {
-        setError(
-          "Registration completed, but user information was not received."
+          "Registration response is incomplete. Please try again."
         );
         return;
       }
@@ -80,23 +75,20 @@ export default function Register() {
       navigate("/dashboard", {
         replace: true,
       });
-
     } catch (err) {
       console.error("Registration error:", err);
 
       if (err.response) {
         setError(
           err.response.data?.message ||
-          "Registration failed."
+            "Registration failed."
         );
       } else if (err.request) {
         setError(
           "Unable to connect to the server. Please check the API connection."
         );
       } else {
-        setError(
-          "Something went wrong. Please try again."
-        );
+        setError("Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -116,7 +108,7 @@ export default function Register() {
         <h1>Student Registration</h1>
 
         {error && (
-          <div className="form-error">
+          <div className="form-error" role="alert">
             {error}
           </div>
         )}
@@ -132,6 +124,7 @@ export default function Register() {
           value={form.name}
           onChange={handleChange}
           placeholder="Your name"
+          autoComplete="name"
           required
           disabled={loading}
         />
@@ -156,18 +149,40 @@ export default function Register() {
           Password
         </label>
 
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Minimum 6 characters"
-          minLength="6"
-          autoComplete="new-password"
-          required
-          disabled={loading}
-        />
+        <div className="password-wrapper">
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Minimum 6 characters"
+            minLength={6}
+            autoComplete="new-password"
+            required
+            disabled={loading}
+          />
+
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() =>
+              setShowPassword((prev) => !prev)
+            }
+            aria-label={
+              showPassword ? "Hide password" : "Show password"
+            }
+            aria-pressed={showPassword}
+            title={showPassword ? "Hide password" : "Show password"}
+            disabled={loading}
+          >
+            {showPassword ? (
+              <EyeOff size={20} />
+            ) : (
+              <Eye size={20} />
+            )}
+          </button>
+        </div>
 
         <button
           type="submit"

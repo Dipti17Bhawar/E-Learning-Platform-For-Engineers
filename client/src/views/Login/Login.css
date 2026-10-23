@@ -3,7 +3,7 @@
    LOGIN PAGE
 ========================================= */
 
-.login-page {
+.auth-page {
   min-height: calc(100vh - 72px);
   background: linear-gradient(135deg, #eef2ff, #f8fafc);
   display: flex;
@@ -17,7 +17,7 @@
    LOGIN CARD
 ========================================= */
 
-.login-card {
+.auth-card {
   width: 100%;
   max-width: 450px;
   background: #ffffff;
@@ -32,13 +32,9 @@
    LOGIN HEADER
 ========================================= */
 
-.login-header {
+.eyebrow {
+  display: block;
   text-align: center;
-  margin-bottom: 30px;
-}
-
-.login-badge {
-  display: inline-block;
   margin-bottom: 12px;
   color: #4f46e5;
   font-size: 12px;
@@ -46,25 +42,19 @@
   letter-spacing: 1.5px;
 }
 
-.login-header h1 {
-  margin: 0 0 12px;
+.auth-card h1 {
+  margin: 0 0 30px;
   color: #172033;
   font-size: 34px;
   font-weight: 800;
-}
-
-.login-header p {
-  margin: 0;
-  color: #667085;
-  font-size: 16px;
-  line-height: 1.6;
+  text-align: center;
 }
 
 /* =========================================
    ERROR MESSAGE
 ========================================= */
 
-.login-error {
+.form-error {
   background: #fef2f2;
   color: #dc2626;
   border: 1px solid #fecaca;
@@ -78,14 +68,10 @@
 }
 
 /* =========================================
-   FORM GROUP
+   FORM LABELS
 ========================================= */
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
+.auth-card label {
   display: block;
   margin-bottom: 8px;
   color: #172033;
@@ -93,10 +79,15 @@
   font-weight: 700;
 }
 
-.form-group input {
+/* =========================================
+   INPUT FIELDS
+========================================= */
+
+.auth-card input {
   width: 100%;
   height: 48px;
   padding: 0 14px;
+  margin-bottom: 20px;
   background: #ffffff;
   color: #172033;
   border: 1.5px solid #d1d5db;
@@ -111,101 +102,156 @@
     background 0.2s ease;
 }
 
-.form-group input::placeholder {
+.auth-card input::placeholder {
   color: #9ca3af;
 }
 
-.form-group input:focus {
+.auth-card input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.form-group input:disabled {
+.auth-card input:disabled {
   background: #f9fafb;
   cursor: not-allowed;
+}
+
+/* =========================================
+   PASSWORD SHOW / HIDE
+========================================= */
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.password-wrapper input {
+  width: 100%;
+  height: 48px;
+  padding: 0 48px 0 14px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+/* Eye icon button */
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.password-toggle:hover:not(:disabled) {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.password-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Prevent global button styles from changing the eye icon */
+.password-toggle svg {
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 /* =========================================
    LOGIN BUTTON
 ========================================= */
 
-.login-submit-btn {
+.btn.btn-primary.full {
   width: 100%;
-  height: 48px;
+  min-height: 48px;
   margin-top: 5px;
+
   background: #4f46e5;
   color: #ffffff;
   border: 2px solid #4f46e5;
   border-radius: 8px;
+
   font-family: inherit;
   font-size: 16px;
   font-weight: 700;
+
   cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease;
 }
 
-.login-submit-btn:hover:not(:disabled) {
+.btn.btn-primary.full:hover:not(:disabled) {
   background: #3730a3;
   border-color: #3730a3;
 }
 
-.login-submit-btn:active:not(:disabled) {
+.btn.btn-primary.full:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.login-submit-btn:disabled {
+.btn.btn-primary.full:disabled {
   background: #a5b4fc;
   border-color: #a5b4fc;
   cursor: not-allowed;
 }
 
 /* =========================================
-   LOADING SPINNER
-========================================= */
-
-.loading-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: loginSpinner 0.7s linear infinite;
-}
-
-@keyframes loginSpinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* =========================================
    REGISTER TEXT
 ========================================= */
 
-.register-text {
-  margin-top: 25px;
+.auth-bottom {
+  margin: 25px 0 0;
   text-align: center;
   color: #667085;
   font-size: 15px;
+  line-height: 1.6;
 }
 
-.register-text a {
+.auth-bottom a {
   color: #4f46e5;
   font-weight: 700;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.register-text a:hover {
+.auth-bottom a:hover {
   color: #3730a3;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 /* =========================================
@@ -213,21 +259,17 @@
 ========================================= */
 
 @media (max-width: 650px) {
-  .login-page {
+  .auth-page {
     min-height: calc(100vh - 60px);
     padding: 35px 18px;
   }
 
-  .login-card {
+  .auth-card {
     padding: 32px 25px;
   }
 
-  .login-header h1 {
+  .auth-card h1 {
     font-size: 30px;
-  }
-
-  .login-header p {
-    font-size: 15px;
   }
 }
 
@@ -236,34 +278,44 @@
 ========================================= */
 
 @media (max-width: 450px) {
-  .login-page {
+  .auth-page {
     padding: 25px 15px;
   }
 
-  .login-card {
+  .auth-card {
     padding: 28px 20px;
     border-radius: 14px;
   }
 
-  .login-header {
+  .auth-card h1 {
+    font-size: 27px;
     margin-bottom: 25px;
   }
 
-  .login-header h1 {
-    font-size: 27px;
-  }
-
-  .login-header p {
+  .auth-card label {
     font-size: 14px;
   }
 
-  .form-group input {
+  .auth-card input,
+  .password-wrapper input {
     height: 46px;
     font-size: 14px;
   }
 
-  .login-submit-btn {
-    height: 46px;
+  .password-wrapper {
+    margin-bottom: 20px;
+  }
+
+  .password-toggle {
+    right: 10px;
+  }
+
+  .btn.btn-primary.full {
+    min-height: 46px;
     font-size: 15px;
+  }
+
+  .auth-bottom {
+    font-size: 14px;
   }
 }

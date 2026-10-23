@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+
 import api from "../../api/axios.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./Login.css";
@@ -14,6 +16,7 @@ export default function Login() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -59,10 +62,8 @@ export default function Login() {
         return;
       }
 
-      // Save authentication through AuthContext
       login(token, user);
 
-      // Navigate to dashboard
       navigate("/dashboard", {
         replace: true,
       });
@@ -120,17 +121,39 @@ export default function Login() {
 
         <label htmlFor="password">Password</label>
 
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          autoComplete="current-password"
-          required
-          disabled={loading}
-        />
+        <div className="password-wrapper">
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+            autoComplete="current-password"
+            required
+            disabled={loading}
+          />
+
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() =>
+              setShowPassword((prev) => !prev)
+            }
+            aria-label={
+              showPassword ? "Hide password" : "Show password"
+            }
+            aria-pressed={showPassword}
+            title={showPassword ? "Hide password" : "Show password"}
+            disabled={loading}
+          >
+            {showPassword ? (
+              <EyeOff size={20} />
+            ) : (
+              <Eye size={20} />
+            )}
+          </button>
+        </div>
 
         <button
           type="submit"
